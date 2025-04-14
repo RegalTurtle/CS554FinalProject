@@ -1,0 +1,40 @@
+.myform {
+    width: 100%;
+    max-width: 28rem;
+}
+
+.myInput {
+    color: inherit;
+    font-weight: bold;
+    border: 2px solid #ddd;
+    padding: 0.5rem;
+    font-size: 1rem;
+    background: inherit;
+    border-radius: 0.25rem;
+    width: 100%;
+}
+
+.myButton {
+    background: #ddd;
+    color: #1e8678;
+    border-color: #333;
+    width: max-content;
+    padding: 0.5em 1em;
+    font-weight: bold;
+    margin-top: 2em;
+    font-size: 1.2rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.myLabel {
+    display: block;
+    width: max-content;
+    font-weight: bold;
+}
+
+.myUl {
+    padding-bottom: 20px;
+}
