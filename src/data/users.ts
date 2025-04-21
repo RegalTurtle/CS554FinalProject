@@ -131,11 +131,20 @@ export const getUser = async (id: string): Promise<Omit<User, 'password'>> => {
   return user;
 };
 
-export const getAllUsers = async (): Promise<Omit<User, 'password'>[]> => {
-  const userCollection = await users();
-  const allUsers = await userCollection.find({}).toArray();
-  return allUsers.map((user: User) => {
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
-  });
+export const getAllUsers = async (): Promise<{
+  allUsersFound: boolean;
+  allUsers?: Omit<User, 'password'>[];
+}> => {
+  try {
+    const userCollection = await users();
+    const allUsers = await userCollection.find({}).toArray();
+    if (!allUsers) throw new Error('getAllUSers: All Users Not Found.');
+    const allUsersWithoutPassword = allUsers.map((user: User) => {
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    });
+    return { allUsersFound: true, allUsers: allUsersWithoutPassword };
+  } catch (e) {
+    return { allUsersFound: false };
+  }
 };

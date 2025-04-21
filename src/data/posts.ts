@@ -70,3 +70,112 @@ export const createPost = async (
     return { postCreated: false };
   }
 };
+
+export const getPostById = async (
+  id: ObjectId | string
+): Promise<{ postFound: boolean; post?: Post }> => {
+  try {
+    if (typeof id === 'string') id.trim();
+    const postCollection = await posts();
+    const post = await postCollection.findOne({ _id: new ObjectId(id) });
+
+    if (!post) throw new Error('getPostByID: No Post Found.');
+
+    return { postFound: true, post };
+  } catch (e) {
+    console.error(e);
+    return { postFound: false };
+  }
+};
+
+export const getAllPosts = async (): Promise<{
+  allPostsFound: boolean;
+  allPosts?: Post[];
+}> => {
+  try {
+    const postCollection = await posts();
+    const allPosts = await postCollection.find({}).toArray();
+    if (!allPosts) throw new Error('getAllPosts: All Posts Not Found.');
+
+    return { allPostsFound: true, allPosts };
+  } catch (e) {
+    console.error(e);
+    return { allPostsFound: false };
+  }
+};
+
+export const updatePost = async (
+  id: ObjectId | string,
+  title?: string,
+  caption?: string
+): Promise<{
+  postUpdated: boolean;
+  updatedPost?: Post;
+}> => {
+  try {
+    if (title) title = title.trim();
+    if (caption) caption = caption.trim();
+
+    const updateData: { title?: string; caption?: string } = {};
+    if (title) updateData.title = title;
+    if (caption) updateData.caption = caption;
+
+    if (Object.keys(updateData).length === 0) {
+      throw new Error('No valid fields provided for update.');
+    }
+
+    const postCollection = await posts();
+
+    const result = await postCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+
+    if (result.modifiedCount === 0) {
+      throw new Error(
+        'No post updated. Either the post does not exist or the data is the same.'
+      );
+    }
+
+    const updatedPost = await postCollection.findOne({ _id: new ObjectId(id) });
+    if (!updatedPost) {
+      throw new Error('updatePost: Could Not Update Post.');
+    }
+
+    return { postUpdated: true, updatedPost };
+  } catch (e) {
+    console.error(e);
+    return { postUpdated: false };
+  }
+};
+
+export const deletePost = async (
+  id: ObjectId | string
+): Promise<{ postDeleted: boolean; deletedPost?: Post }> => {
+  try {
+    const postCollection = await posts();
+    const userCollection = await users();
+
+    const deletedPost = await postCollection.findOneAndDelete({
+      _id: new ObjectId(id),
+    });
+
+    if (!deletedPost) throw new Error('deletePost: Could Not Delete Post.');
+
+    const removePostFromUser = await userCollection.updateOne(
+      { _id: deletedPost.userId }, 
+      {
+        $pull: { posts: new ObjectId(id) },
+      }
+    );
+
+    if (removePostFromUser.modifiedCount === 0) {
+      throw new Error('deletePost: Failed to remove post from user.posts array.');
+    }
+
+    return { postDeleted: true, deletedPost: deletedPost };
+  } catch (e) {
+    console.error(e);
+    return { postDeleted: false };
+  }
+};
