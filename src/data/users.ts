@@ -8,6 +8,7 @@ interface User {
   email: string;
   password: string;
   verified: boolean;
+  posts: (ObjectId | string)[];
 }
 
 // Register a user
@@ -39,6 +40,7 @@ export const registerUser = async (
     email: email.toLowerCase(),
     password: hash,
     verified,
+    posts: [],
   };
 
   const insertInfo = await collectionUser.insertOne(newUser);
@@ -130,7 +132,7 @@ export const getUser = async (id: string): Promise<Omit<User, 'password'>> => {
 };
 
 export const getAllUsers = async (): Promise<Omit<User, 'password'>[]> => {
-  const userCollection = await users(); 
+  const userCollection = await users();
   const allUsers = await userCollection.find({}).toArray();
   return allUsers.map((user: User) => {
     const { password, ...userWithoutPassword } = user;
