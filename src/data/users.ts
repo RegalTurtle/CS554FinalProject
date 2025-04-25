@@ -2,6 +2,11 @@ import bcrypt from 'bcryptjs';
 import { ObjectId } from 'mongodb';
 import { users } from '@/src/config/mongoCollections.js';
 import { env } from '@/src/config/settings.js';
+import {createClient} from "redis";
+
+const redisClient = createClient();
+await redisClient.connect();
+
 interface User {
   _id: ObjectId | string;
   name: string;
@@ -104,6 +109,12 @@ export const comparePass = async (
 export const getUserByemail = async (
   email: string
 ): Promise<Omit<User, 'password'>> => {
+  const exists: number = await redisClient.exists(`user${email}`);
+  if (exists > 0) {
+    const userCached = await redisClient.json.get(`user${email}`, "$");
+    return userCached;
+  }
+
   const collectionUser = await users();
   const user = await collectionUser.findOne({ email: email.toLowerCase() });
 
@@ -111,11 +122,19 @@ export const getUserByemail = async (
 
   delete user.password;
   user._id = user._id.toString();
+
+  await redisClient.set(`user${email}`, "$", user);
   return user;
 };
 
 // Get user by ID
 export const getUser = async (id: string): Promise<Omit<User, 'password'>> => {
+  const exists: number = await redisClient.exists(`user${id}`);
+  if (exists > 0) {
+    const userCached = await redisClient.json.get(`user${id}`, "$");
+    return userCached;
+  }
+
   id = id.trim();
   if (!ObjectId.isValid(id)) throw new Error('Invalid object ID');
 
@@ -128,6 +147,8 @@ export const getUser = async (id: string): Promise<Omit<User, 'password'>> => {
 
   delete user.password;
   user._id = user._id.toString();
+
+  await redisClient.set(`user${id}`, "$", user);
   return user;
 };
 
@@ -136,6 +157,12 @@ export const getAllUsers = async (): Promise<{
   allUsers?: Omit<User, 'password'>[];
 }> => {
   try {
+    const exists: number = await redisClient.exists("users");
+    if (exists > 0) {
+      const allUsersCached = await redisClient.json.get("users", "$");
+      return { allUsersFound: true, allUsers: allUsersCached };
+    }
+
     const userCollection = await users();
     const allUsers = await userCollection.find({}).toArray();
     if (!allUsers) throw new Error('getAllUSers: All Users Not Found.');
@@ -143,6 +170,8 @@ export const getAllUsers = async (): Promise<{
       const { password, ...userWithoutPassword } = user;
       return userWithoutPassword;
     });
+
+    await redisClient.json.set("users", "$", allUsersWithoutPassword);
     return { allUsersFound: true, allUsers: allUsersWithoutPassword };
   } catch (e) {
     return { allUsersFound: false };

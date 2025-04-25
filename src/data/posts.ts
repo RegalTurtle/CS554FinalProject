@@ -2,6 +2,11 @@ import { ObjectId } from 'mongodb';
 import { posts, users } from '@/src/config/mongoCollections.js';
 import { env } from '@/src/config/settings.js';
 import { Buffer } from 'buffer';
+import {createClient} from "redis";
+
+const redisClient = createClient();
+await redisClient.connect();
+
 
 interface Post {
   _id: ObjectId | string;
