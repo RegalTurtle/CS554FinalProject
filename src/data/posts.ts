@@ -1,7 +1,9 @@
 import { ObjectId } from 'mongodb';
 import { posts, users } from '@/src/config/mongoCollections.js';
-import { env } from '@/src/config/settings.js';
 import { Buffer } from 'buffer';
+import redis from 'redis';
+const client = redis.createClient();
+await client.connect();
 
 interface Post {
   _id: ObjectId | string;
@@ -64,6 +66,11 @@ export const createPost = async (
       throw new Error('Error: Failed to update user with the new post.');
     }
 
+    // Set Cache with Post Id
+
+    await client.set(`post${postId}`, JSON.stringify(createdPost));
+    console.log('New Post is Cached.');
+
     return { postCreated: true, post: createdPost };
   } catch (e) {
     console.error(e);
@@ -76,10 +83,25 @@ export const getPostById = async (
 ): Promise<{ postFound: boolean; post?: Post }> => {
   try {
     if (typeof id === 'string') id.trim();
+
+    // Check if it is in Cache
+
+    const cache = await client.get(`post${id}`);
+    if (cache) {
+      console.log('getPostById: Post is Cached.');
+      return JSON.parse(cache);
+    }
+
+    // If not get from Database
     const postCollection = await posts();
     const post = await postCollection.findOne({ _id: new ObjectId(id) });
 
     if (!post) throw new Error('getPostByID: No Post Found.');
+
+    // Cache
+
+    await client.set(`post${id}`, JSON.stringify(post));
+    console.log('getPostById: Post Returned from Cache.');
 
     return { postFound: true, post };
   } catch (e) {
@@ -93,9 +115,23 @@ export const getAllPosts = async (): Promise<{
   allPosts?: Post[];
 }> => {
   try {
+    // Check if it is in Cache
+
+    const cache = await client.get(`allPosts`);
+    if (cache) {
+      console.log('getAllPosts: All Posts is Cached');
+      return JSON.parse(cache);
+    }
+
+    // If not get from Database
     const postCollection = await posts();
     const allPosts = await postCollection.find({}).toArray();
     if (!allPosts) throw new Error('getAllPosts: All Posts Not Found.');
+
+    // Cache
+
+    await client.set(`allPosts`, JSON.stringify(allPosts));
+    console.log(`getAllPosts: All Posts Returned from Cache.`);
 
     return { allPostsFound: true, allPosts };
   } catch (e) {
@@ -142,6 +178,16 @@ export const updatePost = async (
       throw new Error('updatePost: Could Not Update Post.');
     }
 
+    // Since it is Mutation, we delete getAllPosts, postById (all queries)
+
+    await client.del(`post${id}`);
+    await client.del(`allPosts}`);
+
+    // Add the updated Post into cache.
+
+    const cache = await client.set(`post${id}`, JSON.stringify(updatedPost));
+    console.log(`updatePost: Post Updated into Cache!`);
+
     return { postUpdated: true, updatedPost };
   } catch (e) {
     console.error(e);
@@ -163,15 +209,22 @@ export const deletePost = async (
     if (!deletedPost) throw new Error('deletePost: Could Not Delete Post.');
 
     const removePostFromUser = await userCollection.updateOne(
-      { _id: deletedPost.userId }, 
+      { _id: deletedPost.userId },
       {
         $pull: { posts: new ObjectId(id) },
       }
     );
 
     if (removePostFromUser.modifiedCount === 0) {
-      throw new Error('deletePost: Failed to remove post from user.posts array.');
+      throw new Error(
+        'deletePost: Failed to remove post from user.posts array.'
+      );
     }
+
+    // Since it is Mutation, we delete getAllPosts, postById (all queries)
+
+    await client.del(`post${id}`);
+    await client.del(`allPosts}`);
 
     return { postDeleted: true, deletedPost: deletedPost };
   } catch (e) {
