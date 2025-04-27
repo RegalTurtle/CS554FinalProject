@@ -2,6 +2,10 @@ import bcrypt from 'bcryptjs';
 import { ObjectId } from 'mongodb';
 import { users } from '@/src/config/mongoCollections.js';
 import { env } from '@/src/config/settings.js';
+import redis from 'redis';
+const client = redis.createClient();
+await client.connect();
+
 interface User {
   _id: ObjectId | string;
   name: string;
@@ -45,9 +49,14 @@ export const registerUser = async (
 
   const insertInfo = await collectionUser.insertOne(newUser);
 
-  if (!insertInfo.insertedId) {
+  const userId = insertInfo.insertedId;
+  if (!userId) {
     throw new Error('Error: New user insertion was not successful.');
   }
+
+  await client.set(`user${userId}`, JSON.stringify(insertInfo));
+  await client.set(`user${newUser.email}`, JSON.stringify(insertInfo));
+  console.log('New Post is Cached.');
 
   return { signupCompleted: true };
 };
@@ -104,6 +113,12 @@ export const comparePass = async (
 export const getUserByemail = async (
   email: string
 ): Promise<Omit<User, 'password'>> => {
+  const cache = await client.get(`user${email}`);
+  if (cache) {
+    console.log('getUserByEmail: Post is Cached.');
+    return JSON.parse(cache);
+  }
+
   const collectionUser = await users();
   const user = await collectionUser.findOne({ email: email.toLowerCase() });
 
@@ -111,11 +126,19 @@ export const getUserByemail = async (
 
   delete user.password;
   user._id = user._id.toString();
+
+  await client.set(`user${email}`, JSON.stringify(user));
   return user;
 };
 
 // Get user by ID
 export const getUser = async (id: string): Promise<Omit<User, 'password'>> => {
+  const cache = await client.get(`user${id}`);
+  if (cache) {
+    console.log('getUser: Post is Cached.');
+    return JSON.parse(cache);
+  }
+
   id = id.trim();
   if (!ObjectId.isValid(id)) throw new Error('Invalid object ID');
 
@@ -128,6 +151,8 @@ export const getUser = async (id: string): Promise<Omit<User, 'password'>> => {
 
   delete user.password;
   user._id = user._id.toString();
+
+  await client.set(`user${id}`, JSON.stringify(user));
   return user;
 };
 
@@ -136,6 +161,12 @@ export const getAllUsers = async (): Promise<{
   allUsers?: Omit<User, 'password'>[];
 }> => {
   try {
+    const cache = await client.get(`allUsers`);
+    if (cache) {
+      console.log('getAllUsers: All Users is Cached');
+      return JSON.parse(cache);
+    }
+
     const userCollection = await users();
     const allUsers = await userCollection.find({}).toArray();
     if (!allUsers) throw new Error('getAllUSers: All Users Not Found.');
@@ -143,6 +174,9 @@ export const getAllUsers = async (): Promise<{
       const { password, ...userWithoutPassword } = user;
       return userWithoutPassword;
     });
+
+    await client.set(`allUsers`, JSON.stringify(allUsers));
+    console.log(`getAllUsers: All Users Returned from Cache.`);
     return { allUsersFound: true, allUsers: allUsersWithoutPassword };
   } catch (e) {
     return { allUsersFound: false };
