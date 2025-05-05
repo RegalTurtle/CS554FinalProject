@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { posts, users } from '@/src/config/mongoCollections.js';
 import { Buffer } from 'buffer';
-import redis from 'redis';
+import * as redis from 'redis';
 const client = redis.createClient();
 await client.connect();
 

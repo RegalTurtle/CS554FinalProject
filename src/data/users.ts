@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { ObjectId } from 'mongodb';
 import { users } from '@/src/config/mongoCollections.js';
 import { env } from '@/src/config/settings.js';
-import redis from 'redis';
+import * as redis from 'redis';
 const client = redis.createClient();
 await client.connect();
 
