@@ -69,6 +69,7 @@ export const createPost = async (
     // Set Cache with Post Id
 
     await client.set(`post${postId}`, JSON.stringify(createdPost));
+    await client.expire(`post${postId}`, 3600);
     console.log('New Post is Cached.');
 
     return { postCreated: true, post: createdPost };
@@ -101,6 +102,7 @@ export const getPostById = async (
     // Cache
 
     await client.set(`post${id}`, JSON.stringify(post));
+    await client.expire(`post${id}`, 3600);
     console.log('getPostById: Post Returned from Cache.');
 
     return { postFound: true, post };
@@ -131,6 +133,7 @@ export const getAllPosts = async (): Promise<{
     // Cache
 
     await client.set(`allPosts`, JSON.stringify(allPosts));
+    await client.expire(`allPosts`, 3600);
     console.log(`getAllPosts: All Posts Returned from Cache.`);
 
     return { allPostsFound: true, allPosts };
@@ -185,7 +188,8 @@ export const updatePost = async (
 
     // Add the updated Post into cache.
 
-    const cache = await client.set(`post${id}`, JSON.stringify(updatedPost));
+    await client.set(`post${id}`, JSON.stringify(updatedPost));
+    await client.expire(`post${id}`, 3600);
     console.log(`updatePost: Post Updated into Cache!`);
 
     return { postUpdated: true, updatedPost };
@@ -224,7 +228,7 @@ export const deletePost = async (
     // Since it is Mutation, we delete getAllPosts, postById (all queries)
 
     await client.del(`post${id}`);
-    await client.del(`allPosts}`);
+    await client.del(`allPosts`);
 
     return { postDeleted: true, deletedPost: deletedPost };
   } catch (e) {

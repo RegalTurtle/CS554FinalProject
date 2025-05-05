@@ -56,6 +56,9 @@ export const registerUser = async (
 
   await client.set(`user${userId}`, JSON.stringify(insertInfo));
   await client.set(`user${newUser.email}`, JSON.stringify(insertInfo));
+  await client.expire(`user${userId}`, 3600);
+  await client.expire(`user${newUser.email}`, 3600);
+
   console.log('New Post is Cached.');
 
   return { signupCompleted: true };
@@ -128,6 +131,7 @@ export const getUserByemail = async (
   user._id = user._id.toString();
 
   await client.set(`user${email}`, JSON.stringify(user));
+  await client.expire(`user${email}`, 3600);
   return user;
 };
 
@@ -153,6 +157,7 @@ export const getUser = async (id: string): Promise<Omit<User, 'password'>> => {
   user._id = user._id.toString();
 
   await client.set(`user${id}`, JSON.stringify(user));
+  await client.expire(`user${id}`, 3600);
   return user;
 };
 
@@ -176,6 +181,7 @@ export const getAllUsers = async (): Promise<{
     });
 
     await client.set(`allUsers`, JSON.stringify(allUsers));
+    await client.expire(`allUsers`, 3600);
     console.log(`getAllUsers: All Users Returned from Cache.`);
     return { allUsersFound: true, allUsers: allUsersWithoutPassword };
   } catch (e) {
