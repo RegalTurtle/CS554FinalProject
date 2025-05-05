@@ -59,7 +59,7 @@ export const registerUser = async (
   await client.expire(`user${userId}`, 3600);
   await client.expire(`user${newUser.email}`, 3600);
 
-  console.log('New Post is Cached.');
+  console.log('New User is Cached.');
 
   return { signupCompleted: true };
 };
@@ -118,7 +118,7 @@ export const getUserByemail = async (
 ): Promise<Omit<User, 'password'>> => {
   const cache = await client.get(`user${email}`);
   if (cache) {
-    console.log('getUserByEmail: Post is Cached.');
+    console.log('getUserByEmail: User is Cached.');
     return JSON.parse(cache);
   }
 
@@ -139,7 +139,7 @@ export const getUserByemail = async (
 export const getUser = async (id: string): Promise<Omit<User, 'password'>> => {
   const cache = await client.get(`user${id}`);
   if (cache) {
-    console.log('getUser: Post is Cached.');
+    console.log('getUser: User is Cached.');
     return JSON.parse(cache);
   }
 
