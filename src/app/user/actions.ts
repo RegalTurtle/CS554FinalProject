@@ -1,6 +1,7 @@
 'use server';
+import { createSession, deleteSession, getSession } from "@/src/lib/session";
 import { redirect } from 'next/navigation';
-import { registerUser, loginUser } from '../data/users';
+import { registerUser, loginUser } from '@/src/data/users';
 import { revalidatePath } from 'next/cache';
 
 interface FormState {
@@ -56,6 +57,7 @@ export async function createUser(
 }
 
 
+
 export async function login(
     prevState: FormState,
     formData: FormData
@@ -76,17 +78,26 @@ export async function login(
     if (errors.length > 0) {
         return { message: errors };
     }
-
+    let user;
     try {
-        await loginUser(
+        user = await loginUser(
             email as string,
             password as string
         );
     } catch (error: any) {
         return {
-            message: [error.message || 'An error occurred during registration.'],
+            message: [error.message || 'An error occurred during login.'],
         };
     } finally {
-        redirect(`/user/login`); // Navigate to new route
+        await createSession(user._id);
+        console.log(await getSession())
+        redirect("/user/profile");
     }
+}
+
+
+export async function logout() {
+    await deleteSession();
+    console.log(await getSession())
+    redirect("/user/login");
 }
