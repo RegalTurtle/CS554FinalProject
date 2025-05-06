@@ -47,13 +47,14 @@ export async function createUser(
             password as string
         );
     } catch (error: any) {
+        console.log(error)
         return {
+
             message: [error.message || 'An error occurred during registration.'],
         };
-    } finally {
-        revalidatePath('/user');
-        redirect(`/user/login`); // Navigate to new route
     }
+    redirect(`/user/login`); // Navigate to new route
+
 }
 
 
@@ -88,16 +89,14 @@ export async function login(
         return {
             message: [error.message || 'An error occurred during login.'],
         };
-    } finally {
-        await createSession(user._id);
-        console.log(await getSession())
-        redirect("/user/profile");
     }
+    await createSession(user._id);
+    redirect(`/user/${user._id.toString()}`);
+
 }
 
 
 export async function logout() {
     await deleteSession();
-    console.log(await getSession())
     redirect("/user/login");
 }
