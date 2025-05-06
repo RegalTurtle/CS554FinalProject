@@ -1,7 +1,7 @@
 'use client';
 import styles from '@/src/app/form.module.css';
 import { useActionState } from 'react';
-import { createUser } from '@/src/app/actions';
+import { createUser } from '@/src/app/user/actions';
 
 const initialState = {
   message: null
