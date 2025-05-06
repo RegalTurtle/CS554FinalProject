@@ -2,17 +2,27 @@ import bcrypt from 'bcryptjs';
 import { ObjectId } from 'mongodb';
 import { users } from '@/src/config/mongoCollections.js';
 import { env } from '@/src/config/settings.js';
+import fs from 'fs';
+
+
 import * as redis from 'redis';
 const client = redis.createClient();
 await client.connect();
 
-interface User {
+interface Friend {
+  userId: ObjectId | string;
+  status: "requested" | "pending" | "friend";
+}
+
+export default interface User {
   _id: ObjectId | string;
   name: string;
   email: string;
+  image: string;
   password: string;
   verified: boolean;
-  posts: (ObjectId | string)[];
+  friends: Friend[];
+  private: boolean;
 }
 
 // Register a user
@@ -38,13 +48,18 @@ export const registerUser = async (
   if (env.EMAIL_AZURE_SECRET && env.SENDER_AZURE_EMAIL) {
     verified = false;
   }
+  // Read image file into a Buffer
+
+  const filePath = "/public/profile-pic.svg"
 
   const newUser: Omit<User, '_id'> = {
     name: `${firstName} ${lastName}`,
     email: email.toLowerCase(),
     password: hash,
     verified,
-    posts: [],
+    friends: [],
+    image: filePath,
+    private: true
   };
 
   const insertInfo = await collectionUser.insertOne(newUser);

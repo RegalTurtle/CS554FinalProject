@@ -11,26 +11,29 @@ export default function AddUserForm() {
   const [state, formAction] = useActionState(login, initialState);
 
   return (
-    <form action={formAction} className={styles.myform}>
+    <div>
       {state && state.message && (
-        <ul aria-live='polite' className={`sr-only ${styles.myUl}`} role='status'>
+        <ul>
           {state.message.map((msg, index) => (
             <li className='error' key={index}>{msg}</li>
           ))}
         </ul>
       )}
-      <div className='form-group'>
-        <label className={styles.myLabel}>
-          Email:
-          <input className={styles.myInput} name='email' type='email' />
-        </label>
-        <br />
-        <label className={styles.myLabel}>
-          Password:
-          <input className={styles.myInput} name='password' type='password' />
-        </label>
-      </div>
-      <button type='submit' className={styles.myButton}>Login</button>
-    </form>
+      <form action={formAction} className={styles.myform}>
+
+        <div className='form-group'>
+          <label className={styles.myLabel}>
+            Email:
+            <input className={styles.myInput} name='email' type='email' />
+          </label>
+          <br />
+          <label className={styles.myLabel}>
+            Password:
+            <input className={styles.myInput} name='password' type='password' />
+          </label>
+        </div>
+        <button type='submit' className={styles.myButton}>Login</button>
+      </form>
+    </div>
   );
 }
