@@ -9,12 +9,12 @@ import * as redis from 'redis';
 const client = redis.createClient();
 await client.connect();
 
-interface Friend {
-  userId: ObjectId | string;
-  status: "requested" | "pending" | "friend";
+export interface Friend {
+  userId: ObjectId;
+  status: "acceptRequest" | "pending" | "friend";
 }
 
-export default interface User {
+export interface User {
   _id: ObjectId | string;
   name: string;
   email: string;
@@ -50,7 +50,7 @@ export const registerUser = async (
   }
   // Read image file into a Buffer
 
-  const filePath = "/public/profile-pic.svg"
+  const filePath = "profile-pic.svg"
 
   const newUser: Omit<User, '_id'> = {
     name: `${firstName} ${lastName}`,
@@ -68,13 +68,13 @@ export const registerUser = async (
   if (!userId) {
     throw new Error('Error: New user insertion was not successful.');
   }
+  //commented out because it was causing a weird error
+  // await client.set(`user${userId}`, JSON.stringify(insertInfo));
+  // await client.set(`user${newUser.email}`, JSON.stringify(insertInfo));
+  // await client.expire(`user${userId}`, 3600);
+  // await client.expire(`user${newUser.email}`, 3600);
 
-  await client.set(`user${userId}`, JSON.stringify(insertInfo));
-  await client.set(`user${newUser.email}`, JSON.stringify(insertInfo));
-  await client.expire(`user${userId}`, 3600);
-  await client.expire(`user${newUser.email}`, 3600);
-
-  console.log('New User is Cached.');
+  // console.log('New User is Cached.');
 
   return { signupCompleted: true };
 };
@@ -202,4 +202,92 @@ export const getAllUsers = async (): Promise<{
   } catch (e) {
     return { allUsersFound: false };
   }
+};
+
+export const addFriend = async (userId: string, friendId: string) => {
+
+  userId = userId.trim();
+  if (!ObjectId.isValid(userId)) throw new Error('Invalid object ID');
+  friendId = friendId.trim();
+  if (!ObjectId.isValid(userId)) throw new Error('Invalid object ID');
+  const userCollection = await users();
+
+  const user = await userCollection.findOne({
+    _id: new ObjectId(userId),
+    "friends.userId": new ObjectId(friendId)
+  });
+  if (!user) {
+    await userCollection.findOneAndUpdate(
+      { _id: new ObjectId(userId) },
+      {
+        $push: {
+          friends: {
+            userId: new ObjectId(friendId),
+            status: "pending"
+          }
+        }
+      },
+      { returnDocument: "after" }
+    );
+    await client.del(`user${userId}`)
+  } else {
+    throw new Error('User is already a friend, waiting to be accepted as a friend or a pending friend.');
+  }
+
+  const friend = await userCollection.findOne({
+    _id: new ObjectId(friendId),
+    "friends.userId": new ObjectId(userId)
+  });
+  if (!friend) {
+    await userCollection.findOneAndUpdate(
+      { _id: new ObjectId(friendId) },
+      {
+        $push: {
+          friends: {
+            userId: new ObjectId(userId),
+            status: "acceptRequest"
+          }
+        }
+      },
+      { returnDocument: "after" }
+    );
+    client.del(`user${friendId}`)
+  } else {
+    throw new Error('User is already a friend, waiting to be accepted as a friend or a pending friend.');
+  }
+
+};
+
+
+export const acceptRequest = async (userId: string, friendId: string) => {
+
+
+  userId = userId.trim();
+  if (!ObjectId.isValid(userId)) throw new Error('Invalid object ID');
+  friendId = friendId.trim();
+  if (!ObjectId.isValid(userId)) throw new Error('Invalid object ID');
+  const userCollection = await users();
+
+  await userCollection.findOneAndUpdate({
+    _id: new ObjectId(userId),
+    "friends.userId": new ObjectId(friendId)
+  },
+    {
+      $set: {
+        "friends.$.status": "friend"
+      }
+    });
+  client.del(`user${userId}`)
+  await userCollection.findOneAndUpdate({
+    _id: new ObjectId(friendId),
+    "friends.userId": new ObjectId(userId)
+  },
+    {
+      $set: {
+        "friends.$.status": "friend"
+      }
+    });
+  client.del(`user${friendId}`)
+
+
 };
