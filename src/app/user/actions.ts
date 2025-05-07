@@ -1,7 +1,7 @@
 'use server';
 import { createSession, deleteSession, getSession } from "@/src/lib/session";
 import { redirect } from 'next/navigation';
-import { registerUser, loginUser } from '@/src/data/users';
+import { registerUser, loginUser, addFriend, acceptRequest } from '@/src/data/users';
 import { revalidatePath } from 'next/cache';
 
 interface FormState {
@@ -99,4 +99,28 @@ export async function login(
 export async function logout() {
     await deleteSession();
     redirect("/user/login");
+}
+
+export async function requestFriend(userId: string, friendId: string) {
+    try {
+        await addFriend(userId, friendId)
+    } catch (error: any) {
+        return {
+
+            message: [error.message || 'An error occurred during registration.'],
+            status: null
+        };
+    }
+}
+
+export async function acceptFriend(userId: string, friendId: string) {
+    try {
+        await acceptRequest(userId, friendId)
+    } catch (error: any) {
+        return {
+
+            message: [error.message || 'An error occurred during registration.'],
+            status: null
+        };
+    }
 }

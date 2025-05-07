@@ -2,7 +2,7 @@
 import styles from '@/src/app/form.module.css';
 import { useActionState } from 'react';
 import { login } from '@/src/app/user/actions';
-
+export const dynamic = 'force-dynamic';
 const initialState = {
   message: null
 };

@@ -1,0 +1,126 @@
+"use client";
+import { use } from 'react';
+import { useState, useEffect } from 'react';
+import { requestFriend, acceptFriend } from '@/src/app/user/actions';
+import type { Friend as FriendType } from '@/src/data/users';
+import { useActionState } from 'react';
+const initialState = {
+    message: null
+};
+export const dynamic = 'force-dynamic';
+
+
+export default function Friend({ profileId, sessionId, onFriendChange }: { profileId: string, sessionId: string, onFriendChange: () => void }) {
+    const [status, setStatus] = useState<string | null>(null)
+    const [message, setMessage] = useState<string[] | null>(null);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+
+        async function fetchData() {
+            let response = await fetch(`/api/user/${sessionId}`);
+            let data = await response.json();
+            let { user } = data;
+            if (user?.friends) {
+                for (let friend of user.friends) {
+                    if (friend.userId == profileId) {
+                        setStatus(friend.status)
+                    }
+                    if (friend.status == "friend") {
+
+                    }
+                }
+            }
+            setLoading(false)
+
+        }
+        fetchData();
+    }, []);
+
+    const handleRequestFriend = async () => {
+        try {
+            const result = await requestFriend(sessionId, profileId);
+            if (result) {
+                setMessage(result.message);
+            }
+            else {
+                setStatus("pending")
+            }
+        } catch (err: any) {
+            setMessage(err.message || 'Something went wrong');
+        }
+
+    };
+    const handleAcceptFriend = async () => {
+        try {
+            const result = await acceptFriend(sessionId, profileId);
+            if (result) {
+                setMessage(result.message);
+            }
+            else {
+                setStatus("friend")
+                onFriendChange()
+            }
+        } catch (err: any) {
+            setMessage(err.message || 'Something went wrong');
+        }
+
+    };
+
+    let statusElem = (<></>)
+    if (loading) {
+        return (<></>);
+    }
+    else {
+        if (status != null) {
+            if (status == "acceptRequest") {
+                statusElem = (
+                    <div>
+                        <button
+                            onClick={() => handleAcceptFriend()}
+                            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
+                        >
+                            Accept Request
+                        </button>
+                    </div>)
+            }
+            else if (status === "friend") {
+                statusElem = (
+                    <div className="flex items-center space-x-4 p-3 bg-green-100 text-green-800 rounded-xl shadow-sm border border-green-300">
+                        Friend
+                    </div>
+                );
+            } else if (status === "pending") {
+                statusElem = (
+                    <div className="flex items-center space-x-4 p-3 bg-yellow-100 text-yellow-800 rounded-xl shadow-sm border border-yellow-300">
+                        Pending
+                    </div>
+                );
+            }
+
+        }
+        else {
+            statusElem = (<div>
+                <button
+                    onClick={() => handleRequestFriend()}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
+                >
+                    Add Friend
+                </button>
+            </div>)
+        }
+
+        return (
+            <div>
+                {message && (
+                    <ul>
+                        {message.map((msg, index) => (
+                            <li className='error' key={index}>{msg}</li>
+                        ))}
+                    </ul>
+                )}
+
+                {statusElem}
+            </div>
+        );
+    }
+}

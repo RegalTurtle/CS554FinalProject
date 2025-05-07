@@ -1,6 +1,26 @@
-import Image from 'next/image';
+'use client';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import type { SessionPayload } from '@/src/lib/session';
 export default function Home() {
+  const [session, setSession] = useState<SessionPayload | undefined | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+
+    async function fetchData() {
+      const response = await fetch(`/api/session`);
+      const data = await response.json();
+      let { session } = data;
+      setSession(session);
+      setLoading(false)
+    }
+
+    fetchData();
+  }, []);
+  if (loading) {
+    return <div>Loading...</div>;
+  }
   return (
     <main className="min-h-screen bg-white text-gray-800 flex flex-col items-center justify-center px-6 py-16">
       <section className="max-w-4xl text-center">
@@ -20,20 +40,33 @@ export default function Home() {
           growing community.
         </p>
         <div className="flex justify-center gap-4 mt-6">
-          <Link
-            className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"
-            href={'/user/login'}
-          >
-            Login
-          </Link>
-          <Link
-            className="bg-gray-200 text-gray-800 px-6 py-3 rounded-xl hover:bg-gray-300 transition"
-            href={'/user/register'}
-          >
-            Sign Up
-          </Link>
+
+          {session?.userId && (
+            <Link
+              className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"
+              href={`/user/${session.userId}`}
+            >
+              Profile
+            </Link>
+          )}
+          {!!!session?.userId && (
+            <>
+              <Link
+                className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"
+                href={'/user/login'}
+              >
+                Login
+              </Link>
+              <Link
+                className="bg-gray-200 text-gray-800 px-6 py-3 rounded-xl hover:bg-gray-300 transition"
+                href={'/user/register'}
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
       </section>
-    </main>
+    </main >
   );
 }
