@@ -23,6 +23,7 @@ export interface User {
   verified: boolean;
   friends: Friend[];
   private: boolean;
+  bio: String;
 }
 
 // Register a user
@@ -59,7 +60,8 @@ export const registerUser = async (
     verified,
     friends: [],
     image: filePath,
-    private: true
+    private: true,
+    bio: ""
   };
 
   const insertInfo = await collectionUser.insertOne(newUser);
@@ -75,7 +77,7 @@ export const registerUser = async (
   // await client.expire(`user${newUser.email}`, 3600);
 
   // console.log('New User is Cached.');
-
+  client.del(`allUsers`)
   return { signupCompleted: true };
 };
 
@@ -181,11 +183,14 @@ export const getAllUsers = async (): Promise<{
   allUsers?: Omit<User, 'password'>[];
 }> => {
   try {
+    let fields: { name?: RegExp } = {}
+
     const cache = await client.get(`allUsers`);
     if (cache) {
       console.log('getAllUsers: All Users is Cached');
       return JSON.parse(cache);
     }
+
 
     const userCollection = await users();
     const allUsers = await userCollection.find({}).toArray();
@@ -198,9 +203,9 @@ export const getAllUsers = async (): Promise<{
     await client.set(`allUsers`, JSON.stringify(allUsers));
     await client.expire(`allUsers`, 3600);
     console.log(`getAllUsers: All Users Returned from Cache.`);
-    return { allUsersFound: true, allUsers: allUsersWithoutPassword };
+    return allUsersWithoutPassword;
   } catch (e) {
-    return { allUsersFound: false };
+    throw new Error('Unable to get users');
   }
 };
 

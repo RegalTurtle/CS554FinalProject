@@ -13,6 +13,7 @@ interface Post {
   caption: string;
   likedUsers: (ObjectId | string)[];
   comments: (ObjectId | string)[];
+
 }
 
 export const createPost = async (
@@ -39,7 +40,7 @@ export const createPost = async (
       image: image,
       caption: caption,
       likedUsers: [],
-      comments: [],
+      comments: []
     };
 
     const insertPost = await postCollection.insertOne(newPost);
@@ -236,3 +237,35 @@ export const deletePost = async (
     return { postDeleted: false };
   }
 };
+
+// export const getPost = async (
+//   { userId, getFeed }: { userId: string | null | undefined, getFeed: boolean | null | undefined }
+// ): Promise<{ postFound: boolean; post?: Post }> => {
+//   try {
+
+//     const postCollection = await posts();
+//     let fields: { userId?: string, private?: boolean } = {};
+//     if (getFeed) {
+//       fields.private = false
+//     }
+//     else if (userId) {
+//       const userCollection = await users();
+//       const user = await userCollection.findOne({ _id: userId });
+//       if (!user) throw new Error('User not found.');
+//       fields.userId = userId
+//     }
+//     const post = await postCollection.find(fields).toArray;
+
+//     if (!post) throw new Error('getPostByID: No Post Found.');
+
+//     // Cache
+
+//     // await client.set(`post${id}`, JSON.stringify(post));
+//     // await client.expire(`post${id}`, 3600);
+//     // console.log('getPostById: Post Returned from Cache.');
+
+//     return { postFound: true, post };
+//   } catch (e) {
+//     return { postFound: false };
+//   }
+// };
