@@ -9,6 +9,7 @@ export default function Header() {
     const pathname = usePathname();
     const [session, setSession] = useState<SessionPayload | undefined | null>(null);
 
+
     useEffect(() => {
 
         async function fetchData() {
@@ -16,10 +17,13 @@ export default function Header() {
             const data = await response.json();
             let { session } = data;
             setSession(session);
+
         }
 
         fetchData();
     }, [pathname]);
+
+
     return (
         <header className="bg-gray-800 text-white p-4 shadow-md">
             <h1 className="text-2xl font-bold">The Web</h1>
@@ -28,7 +32,10 @@ export default function Header() {
                     <li><Link href={'/'}>Home</Link></li>
 
                     {session?.userId && (
-                        <li><Link href={`/user/${session.userId}`}>Profile</Link></li>
+                        <>
+                            <li><Link href={`/user/${session.userId}`}>Profile</Link></li>
+                            <li><Link href={`/user`}>Search</Link></li>
+                        </>
                     )}
                     {!!!session?.userId && (
                         <>

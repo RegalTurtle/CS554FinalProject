@@ -1,7 +1,7 @@
 'use server';
 import { createSession, deleteSession, getSession } from "@/src/lib/session";
 import { redirect } from 'next/navigation';
-import { registerUser, loginUser, addFriend, acceptRequest } from '@/src/data/users';
+import { registerUser, loginUser, addFriend, acceptRequest, getAllUsers } from '@/src/data/users';
 import { revalidatePath } from 'next/cache';
 
 interface FormState {
@@ -123,4 +123,22 @@ export async function acceptFriend(userId: string, friendId: string) {
             status: null
         };
     }
+}
+
+export async function getUsers() {
+    let users: any = []
+    try {
+        users = await getAllUsers()
+    } catch (error: any) {
+        return {
+
+            message: [error.message || 'An error occurred during registration.'],
+            users: users
+        };
+    }
+    return {
+
+        message: [],
+        users: users
+    };
 }

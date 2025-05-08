@@ -8,27 +8,20 @@ const initialState = {
     message: null
 };
 export const dynamic = 'force-dynamic';
+import { User } from '@/src/data/users';
+type PublicUser = Omit<User, 'password'>;
 
 
-export default function Friend({ profileId, sessionId, onFriendChange }: { profileId: string, sessionId: string, onFriendChange: () => void }) {
+export default function Friend({ profileId, sessionUser, onFriendChange }: { profileId: string, sessionUser: PublicUser, onFriendChange: () => void }) {
     const [status, setStatus] = useState<string | null>(null)
     const [message, setMessage] = useState<string[] | null>(null);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
 
         async function fetchData() {
-            let response = await fetch(`/api/user/${sessionId}`);
-            let data = await response.json();
-            let { user } = data;
-            if (user?.friends) {
-                for (let friend of user.friends) {
-                    if (friend.userId == profileId) {
-                        setStatus(friend.status)
-                    }
-                    if (friend.status == "friend") {
-
-                    }
-                }
+            let friend = sessionUser.friends?.filter((item: any) => item.userId === profileId)
+            if (friend.length === 1) {
+                setStatus(friend[0].status)
             }
             setLoading(false)
 
@@ -38,7 +31,7 @@ export default function Friend({ profileId, sessionId, onFriendChange }: { profi
 
     const handleRequestFriend = async () => {
         try {
-            const result = await requestFriend(sessionId, profileId);
+            const result = await requestFriend(sessionUser._id.toString(), profileId);
             if (result) {
                 setMessage(result.message);
             }
@@ -52,7 +45,7 @@ export default function Friend({ profileId, sessionId, onFriendChange }: { profi
     };
     const handleAcceptFriend = async () => {
         try {
-            const result = await acceptFriend(sessionId, profileId);
+            const result = await acceptFriend(sessionUser._id.toString(), profileId);
             if (result) {
                 setMessage(result.message);
             }
@@ -76,7 +69,7 @@ export default function Friend({ profileId, sessionId, onFriendChange }: { profi
                 statusElem = (
                     <div>
                         <button
-                            onClick={() => handleAcceptFriend()}
+                            onClick={(e) => { e.preventDefault(); handleAcceptFriend() }}
                             className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
                         >
                             Accept Request
@@ -101,7 +94,7 @@ export default function Friend({ profileId, sessionId, onFriendChange }: { profi
         else {
             statusElem = (<div>
                 <button
-                    onClick={() => handleRequestFriend()}
+                    onClick={(e) => { e.preventDefault(); handleRequestFriend() }}
                     className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
                 >
                     Add Friend
