@@ -11,7 +11,7 @@ const initialState = {
   message: [],
   user: []
 };
-export default function AddUserForm() {
+export default function searchUser() {
   const [sessionUser, setSessionUser] = useState<PublicUser | null>(null);
   const [users, setUsers] = useState<PublicUser[]>([]);
   const [loading, setLoading] = useState<boolean>(!users);
