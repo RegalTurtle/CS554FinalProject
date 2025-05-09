@@ -7,7 +7,7 @@ const initialState = {
   message: null
 };
 
-export function AddUserForm() {
+export default function AddUserForm() {
   const [state, formAction] = useActionState(createUser, initialState);
 
   return (
