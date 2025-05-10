@@ -8,7 +8,6 @@ export default function NewPostPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    userId: '', // Add userId field to form data
     title: '',
     caption: '',
     image: null as File | null,
@@ -43,10 +42,6 @@ export default function NewPostPage() {
     setError('');
 
     try {
-      // Validate inputs
-      if (!formData.userId) {
-        throw new Error('Please enter a user ID');
-      }
 
       if (!formData.image) {
         throw new Error('Please select an image');
@@ -65,7 +60,6 @@ export default function NewPostPage() {
 
       // Prepare post data
       const postData = {
-        userId: formData.userId,
         title: formData.title,
         image: {
           data: imageData,
@@ -110,21 +104,6 @@ export default function NewPostPage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Add userId input field */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            User ID
-          </label>
-          <input
-            type="text"
-            name="userId"
-            value={formData.userId}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Title

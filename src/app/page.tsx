@@ -49,7 +49,7 @@ export default function Home() {
               Profile
             </Link>
           )}
-          {!!!session?.userId && (
+          {!session?.userId && (
             <>
               <Link
                 className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"

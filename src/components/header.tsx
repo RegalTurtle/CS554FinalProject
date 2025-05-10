@@ -37,7 +37,7 @@ export default function Header() {
                             <li><Link href={`/user`}>Search</Link></li>
                         </>
                     )}
-                    {!!!session?.userId && (
+                    {!session?.userId && (
                         <>
                             <li><Link href={'/user/login'}>Login</Link></li>
                             <li><Link href={'/user/register'}>Sign Up</Link></li>
