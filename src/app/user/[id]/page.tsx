@@ -1,8 +1,9 @@
 "use client";
 import { use } from 'react';
 import { useState, useEffect } from 'react';
-import { logout } from '@/src/app/user/actions';
+import { getPosts } from '@/src/app/user/actions';
 import { User } from '@/src/data/users';
+import UserPosts from '../userPosts';
 import IndividualUser from '../individualUser';
 import Link from 'next/link';
 type PublicUser = Omit<User, 'password'>;
@@ -31,6 +32,9 @@ export default function profile({ params }: { params: Promise<{ id: string }> })
                 const response = await fetch(`/api/user/${session.userId}`);
                 const data = await response.json();
                 setSessionUser(data.user)
+            }
+            else {
+                setSessionUser(null)
             }
             setLoading(false);
 
@@ -165,7 +169,9 @@ export default function profile({ params }: { params: Promise<{ id: string }> })
 
                 <div className="mt-4">
                     <div data-content="posts">
-                        <div>No Posts available</div>
+                        {user && (
+                            <UserPosts profileUser={user} />
+                        )}
                     </div>
                     <div data-content="friends" className="hidden">
                         {mapFriends}

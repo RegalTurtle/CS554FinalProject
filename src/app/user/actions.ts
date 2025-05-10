@@ -2,10 +2,36 @@
 import { createSession, deleteSession, getSession } from "@/src/lib/session";
 import { redirect } from 'next/navigation';
 import { registerUser, loginUser, addFriend, acceptRequest, getAllUsers } from '@/src/data/users';
+import { getAllPostsByUser } from "@/src/data/posts";
 import { revalidatePath } from 'next/cache';
 
 interface FormState {
     message: string[] | null;
+}
+
+export async function getPosts(userId: string) {
+    let posts: any = {}
+    try {
+        posts = await getAllPostsByUser(userId)
+    } catch (error: any) {
+        return {
+
+            message: [error.message || 'Could not get all posts'],
+            posts: null
+        };
+    }
+    if (posts.allPostsFound) {
+        return {
+
+            message: [],
+            posts: posts.allPosts
+        };
+    }
+    return {
+
+        message: ['Could not get all posts'],
+        posts: null
+    };
 }
 
 export async function createUser(

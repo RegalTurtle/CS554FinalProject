@@ -5,11 +5,11 @@ import * as redis from 'redis';
 const client = redis.createClient();
 await client.connect();
 
-interface Post {
+export interface Post {
   _id: ObjectId | string;
   userId: ObjectId | string;
   title: string;
-  image: Buffer;
+  image: Buffer | string;
   caption: string;
   likedUsers: (ObjectId | string)[];
   comments: (ObjectId | string)[];
@@ -67,6 +67,8 @@ export const createPost = async (
       throw new Error('Error: Failed to update user with the new post.');
     }
 
+    await client.del(`allPosts}`);
+    await client.del(`allPosts-${userId.toString()}`);
     // Set Cache with Post Id
 
     await client.set(`post${postId}`, JSON.stringify(createdPost));
@@ -186,7 +188,7 @@ export const updatePost = async (
 
     await client.del(`post${id}`);
     await client.del(`allPosts}`);
-
+    await client.del(`allPosts-${updatedPost.userId.toString()}`);
     // Add the updated Post into cache.
 
     await client.set(`post${id}`, JSON.stringify(updatedPost));
@@ -230,6 +232,7 @@ export const deletePost = async (
 
     await client.del(`post${id}`);
     await client.del(`allPosts`);
+    await client.del(`allPosts-${deletedPost.userId.toString()}`);
 
     return { postDeleted: true, deletedPost: deletedPost };
   } catch (e) {
@@ -238,34 +241,35 @@ export const deletePost = async (
   }
 };
 
-// export const getPost = async (
-//   { userId, getFeed }: { userId: string | null | undefined, getFeed: boolean | null | undefined }
-// ): Promise<{ postFound: boolean; post?: Post }> => {
-//   try {
+export const getAllPostsByUser = async (userId: ObjectId | string): Promise<{
+  allPostsFound: boolean;
+  allPosts?: Post[];
+}> => {
+  try {
+    if (typeof userId === 'string') userId.trim();
+    // Check if it is in Cache
 
-//     const postCollection = await posts();
-//     let fields: { userId?: string, private?: boolean } = {};
-//     if (getFeed) {
-//       fields.private = false
-//     }
-//     else if (userId) {
-//       const userCollection = await users();
-//       const user = await userCollection.findOne({ _id: userId });
-//       if (!user) throw new Error('User not found.');
-//       fields.userId = userId
-//     }
-//     const post = await postCollection.find(fields).toArray;
+    const cache = await client.get(`allPosts-${userId.toString()}`);
+    if (cache) {
+      console.log('getAllPosts: All Posts is Cached');
+      return JSON.parse(cache);
+    }
+    console.log(userId)
+    // If not get from Database
+    const postCollection = await posts();
+    const allPosts = await postCollection.find({ userId: new ObjectId(userId) }).toArray();
+    if (!allPosts) throw new Error('getAllPosts: All Posts Not Found.');
+    allPosts.map((post: Post) => {
+      post.image = post.image.toString()
+    });
+    // Cache
 
-//     if (!post) throw new Error('getPostByID: No Post Found.');
+    await client.set(`allPosts-${userId.toString()}`, JSON.stringify(allPosts));
+    await client.expire(`allPosts-${userId.toString()}`, 3600);
+    console.log(`getAllPosts: All Posts Returned from Cache.`);
 
-//     // Cache
-
-//     // await client.set(`post${id}`, JSON.stringify(post));
-//     // await client.expire(`post${id}`, 3600);
-//     // console.log('getPostById: Post Returned from Cache.');
-
-//     return { postFound: true, post };
-//   } catch (e) {
-//     return { postFound: false };
-//   }
-// };
+    return allPosts;
+  } catch (e) {
+    throw new Error('Unable to get posts');
+  }
+};
