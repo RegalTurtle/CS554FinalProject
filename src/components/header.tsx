@@ -35,6 +35,7 @@ export default function Header() {
                         <>
                             <li><Link href={`/user/${session.userId}`}>Profile</Link></li>
                             <li><Link href={`/user`}>Search</Link></li>
+                            <li><Link href={`/post/new`}>New Post</Link></li>
                         </>
                     )}
                     {!session?.userId && (
