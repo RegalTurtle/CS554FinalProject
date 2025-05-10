@@ -6,6 +6,7 @@ import fs from 'fs';
 
 
 import * as redis from 'redis';
+// const client = redis.createClient({ url: `redis://173.3.80.96:6379` });
 const client = redis.createClient();
 await client.connect();
 
