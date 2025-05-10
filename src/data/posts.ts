@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import { posts, users } from '@/src/config/mongoCollections.js';
 import { Buffer } from 'buffer';
 import * as redis from 'redis';
-import {getUser} from "./users";
+import { getUser } from "./users";
 
 // const client = redis.createClient({ url: `redis://173.3.80.96:6379` });
 const client = redis.createClient();
@@ -290,7 +290,7 @@ export const checkIfLiked = async (
   try {
     if (typeof userId === 'string')
       userId = userId.trim();
-    
+
     const postObj = await getPostById(postId);
     const post: Post | undefined = postObj.post;
     if (post === undefined)
@@ -314,7 +314,7 @@ export const likePost = async (
   try {
     if (typeof userId === 'string')
       userId = userId.trim();
-    
+
     const postObj = await getPostById(postId);
     const post: Post | undefined = postObj.post;
     if (post === undefined)
@@ -331,17 +331,17 @@ export const likePost = async (
 
     const postCollection = await posts();
     const updatedPost: Post | undefined = await postCollection.updateOne({
-        _id: new ObjectId(postId)
-      }, {
-        $set: {
-          likedUsers: newLikedUsers
-        }
+      _id: new ObjectId(postId)
+    }, {
+      $set: {
+        likedUsers: newLikedUsers
       }
+    }
     );
     if (!updatedPost)
       throw "failed to update post";
 
-    const newPost: Post = await postCollection.findOne({_id: new ObjectId(postId)});
+    const newPost: Post = await postCollection.findOne({ _id: new ObjectId(postId) });
     await client.del(`post${postId}`);
     await client.del(`allPosts}`);
     await client.del(`allPosts-${updatedPost.userId.toString()}`);
@@ -356,7 +356,7 @@ export const likePost = async (
 
   } catch (e) {
     console.error(e);
-    return {postUpdated: false};
+    return { postUpdated: false };
   }
 };
 
@@ -374,7 +374,7 @@ export const createComment = async (
 
     if (typeof userId === 'string')
       userId = userId.trim();
-    
+
     const postObj = await getPostById(postId);
     const post: Post | undefined = postObj.post;
     if (post === undefined)
@@ -389,17 +389,17 @@ export const createComment = async (
 
     const postCollection = await posts();
     const updatedPost: Post | undefined = await postCollection.updateOne({
-        _id: new ObjectId(postId)
-      }, {
-        $set: {
-          comments: newComments
-        }
+      _id: new ObjectId(postId)
+    }, {
+      $set: {
+        comments: newComments
       }
+    }
     );
     if (!updatedPost)
       throw "failed to update post";
 
-    const newPost: Post = await postCollection.findOne({_id: new ObjectId(postId)});
+    const newPost: Post = await postCollection.findOne({ _id: new ObjectId(postId) });
     await client.del(`post${postId}`);
     await client.del(`allPosts}`);
     await client.del(`allPosts-${updatedPost.userId.toString()}`);
@@ -414,6 +414,6 @@ export const createComment = async (
 
   } catch (e) {
     console.error(e);
-    return {postUpdated: false};
+    return { postUpdated: false };
   }
 }
