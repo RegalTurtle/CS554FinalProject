@@ -11,7 +11,7 @@ export const resizeImage = ({
   width: string;
   height: string;
 }): void => {
-  im.convert([srcPath, '-resize', `${width}x${height}`, dstPath], 
+  im.convert([srcPath, '-resize', `${width}x${height}`, dstPath],
     (err: Error | null) => {
       if (err) {
         console.error('Resize failed:', err);
@@ -25,16 +25,19 @@ export const resizeImage = ({
 export const grayScaleImage = (
   srcPath: string,
   dstPath: string,
-): void => {
-  im.convert([srcPath, '-colorspace', 'Gray', dstPath], 
-    (err: Error | null) => {
-      if (err) {
-        console.error('Grayscale failed:', err);
-        throw err;
+): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    im.convert([srcPath, '-colorspace', 'Gray', dstPath],
+      (err: Error | null) => {
+        if (err) {
+          console.error('Grayscale failed:', err);
+          return reject(err);
+        }
+        console.log(`Grayscale successful`);
+        resolve();
       }
-      console.log(`Grayscale successful`);
-    }
-  )
+    )
+  })
 }
 
 export default { resizeImage, grayScaleImage };
