@@ -15,10 +15,15 @@ export default function CommentButton(props: Props) {
 		<button onClick={() => setBox(!box)}>Comment</button>
 
 		{box &&
-		<div>
+		<form>
+			<input id="commentBox" type="text" name="commentBox" />
 
-		</div>
-		}
+			<button type="submit" onClick={async () => {
+				const text: string | null = (document.getElementById("commentBox") as HTMLInputElement).value;
+				if (text !== null)
+					createComment(props.userId, props.postId, text);
+			}}>Submit</button>
+		</form>}
 	</div>
 	);
 }
