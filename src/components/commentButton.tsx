@@ -21,7 +21,7 @@ export default function CommentButton(props: Props) {
 			<button type="submit" onClick={async () => {
 				const text: string | null = (document.getElementById("commentBox") as HTMLInputElement).value;
 				if (text !== null)
-					createComment(props.userId, props.postId, text);
+					await createComment(props.userId, props.postId, text);
 			}}>Submit</button>
 		</form>}
 	</div>
