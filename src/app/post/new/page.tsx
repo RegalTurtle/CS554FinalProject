@@ -18,6 +18,12 @@ export default function NewPostPage() {
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState('');
 
+  // State for cropping
+  const [widthPercent, setWidthPercent] = useState(100);
+  const [heightPercent, setHeightPercent] = useState(100);
+  const [offsetHorizontalPercent, setOffsetHorizontalPercent] = useState(0);
+  const [offsetVerticalPercent, setOffsetVerticalPercent] = useState(0);
+
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -123,7 +129,12 @@ export default function NewPostPage() {
           contentType: formData.image.type,
         },
         operation,
+        additionalData: {}
       };
+
+      if (operation === 'crop') {
+        postData.additionalData = { widthPercent, heightPercent, offsetHorizontalPercent, offsetVerticalPercent };
+      }
 
       // Send to API
       const response = await fetch('/api/edit-image', {
@@ -244,8 +255,16 @@ export default function NewPostPage() {
       </form>
 
       <Modal show={showModal} onClose={() => setShowModal(false)}>
+        {/* The error box */}
+        {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+        )}
+
+        {/* The preview image */}
         {previewImage && (
-          <div className="mt-2">
+          <div className="mt-1">
             <img
               src={previewImage}
               alt="Preview"
@@ -253,23 +272,100 @@ export default function NewPostPage() {
             />
           </div>
         )}
-        <div className="my-1">
+
+        <div className="my-1 flex flex-col">
+          {/* The grayscale button */}
           <button
             type="button"
             onClick={() => {handleEditImage(`grayscale`)}}
             disabled={isEditing}
-            className="mr-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Grayscale
           </button>
-          <button
-            type="button"
-            onClick={() => {handleEditImage(`resize`)}}
-            disabled={isEditing}
-            className="mr-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Resize
-          </button>
+
+          {/* The crop button + inputs */}
+          <div className="flex flex-col my-2 border rounded p-2">
+            <div className='flex'>
+              <label className='p-2'>Width %</label>
+              <input 
+                type="number"
+                placeholder="100"
+                value={widthPercent}
+                onChange={(e) => setWidthPercent(Number(e.target.value))}
+                min="0"
+                max="100"
+                className="w-20 mr-2 px-2 py-2 border rounded text-sm"
+              />
+              <p className="inline mr-2 py-2">x</p>
+              <label className='p-2'>Height %</label>
+              <input 
+                type="number"
+                placeholder="100"
+                value={heightPercent}
+                onChange={(e) => setHeightPercent(Number(e.target.value))}
+                min="0"
+                max="100"
+                className="w-20 mr-2 px-2 py-2 border rounded text-sm"
+              />
+            </div>
+
+            <div className='flex'>
+              <label className='p-2'>Horizontal Offset %</label>
+              <input 
+                type="number"
+                placeholder="0"
+                value={offsetHorizontalPercent}
+                onChange={(e) => setOffsetHorizontalPercent(Number(e.target.value))}
+                min="0"
+                max="100"
+                className="w-20 mr-2 px-2 py-2 border rounded text-sm"
+              />
+              <p className="inline mr-2 py-2">x</p>
+              <label className='p-2'>Vertical Offset %</label>
+              <input 
+                type="number"
+                placeholder="0"
+                value={offsetVerticalPercent}
+                onChange={(e) => setOffsetVerticalPercent(Number(e.target.value))}
+                min="0"
+                max="100"
+                className="w-20 mr-2 px-2 py-2 border rounded text-sm"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {handleEditImage(`crop`)}}
+              disabled={isEditing}
+              className="mt-2 mr-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Crop
+            </button>
+          </div>
+
+          {/* The resize button + inputs */}
+          <div>
+            <input 
+              type="text"
+              className="w-20 mr-2 px-2 py-2 border rounded text-sm"
+            />
+            <p
+              className="inline mr-2"
+            >x</p>
+            <input 
+              type="text"
+              className="w-20 mr-2 px-2 py-2 border rounded text-sm"
+            />
+            <button
+              type="button"
+              onClick={() => {handleEditImage(`resize`)}}
+              disabled={isEditing}
+              className="mt-2 mr-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Resize
+            </button>
+          </div>
         </div>
       </Modal>
     </div>
