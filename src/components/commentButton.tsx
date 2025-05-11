@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {createComment} from "../data/posts";
+import {createComment} from "@/src/data/posts";
 
 export default function CommentButton() {
 	const [box, setBox] = useState(false);
