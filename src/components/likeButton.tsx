@@ -12,15 +12,11 @@ export default function LikeButton(props: Props) {
 
 	useEffect(() =>
 	{
-		const checkIfLikedFunc = (): void =>
-		{
-			const checkIfLikedFuncInAFunc = async (): Promise<boolean> =>
-				await checkIfLiked(props.userId, props.postId);
-			
-			checkIfLikedFuncInAFunc().then((result: boolean) =>
-			setIsLiked(result));
-		};
-		checkIfLikedFunc();
+		const checkIfLikedFunc = async (): Promise<boolean> =>
+			await checkIfLiked(props.userId, props.postId);
+		
+		checkIfLikedFunc().then((result: boolean) =>
+		setIsLiked(result));
 	});
 
 	return (
