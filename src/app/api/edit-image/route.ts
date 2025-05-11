@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     // Convert the image data back to a Buffer
-    const imageBuffer = Buffer.from(data.image.data);
+    const imageBuffer = Buffer.from(data.image.data, `base64`);
 
     // create the file path
     const tempDir = path.join(process.cwd(), `.temp`);
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     try {
       switch (data.operation) {
         case 'grayscale':
-          im.grayScaleImage(filePath, newFilePath);
+          await im.grayScaleImage(filePath, newFilePath);
           break;
         default:
           return NextResponse.json(
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       }
     } catch (e: any) {
       return NextResponse.json(
-        { message: `Error in ImageMagick: ${e.message}`},
+        { message: `Error in ImageMagick: ${e.message}` },
         { status: 500 }
       )
     }
@@ -67,10 +67,12 @@ export async function POST(request: Request) {
     const newImageBuffer = await fs.readFile(newFilePath);
     const response = new NextResponse(
       newImageBuffer,
-      { status: 200, headers: {
-        'Content-Type': `image/${contentType}`,
-        'Content-Disposition': `inline`,
-      }}
+      {
+        status: 200, headers: {
+          'Content-Type': `image/${contentType}`,
+          'Content-Disposition': `inline`,
+        }
+      }
     );
 
     // delete the images
