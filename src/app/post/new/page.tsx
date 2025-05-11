@@ -142,6 +142,7 @@ export default function NewPostPage() {
       const blob = await response.blob();
       const imageUrl = URL.createObjectURL(blob);
       setPreviewImage(imageUrl);
+      formData.image = new File([blob], 'edited-image.png', { type: blob.type });
     } catch (e) {
       console.error('Error creating post:', e);
       setError(
