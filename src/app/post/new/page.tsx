@@ -2,6 +2,7 @@
 
 import { useState, useRef, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Modal from '@/src/components/Modal';
 
 export default function NewPostPage() {
   const router = useRouter();
@@ -13,6 +14,8 @@ export default function NewPostPage() {
     image: null as File | null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState('');
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -93,6 +96,63 @@ export default function NewPostPage() {
     }
   };
 
+  const handleEditImage = async (operation: string) => {
+    setIsEditing(true);
+    setError('');
+
+    try {
+      if (!formData.image) {
+        throw new Error('Please select an image');
+      }
+
+      // Convert image to base64
+      const base64Image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(formData.image!);
+      });
+
+      // Remove data URL prefix
+      const imageData = base64Image.split(',')[1];
+
+      // Prepare post data
+      const postData = {
+        image: {
+          data: imageData,
+          contentType: formData.image.type,
+        },
+        operation,
+      };
+
+      // Send to API
+      const response = await fetch('/api/edit-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create post');
+      }
+
+      const blob = await response.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      setPreviewImage(imageUrl);
+      formData.image = new File([blob], 'edited-image.png', { type: blob.type });
+    } catch (e) {
+      console.error('Error creating post:', e);
+      setError(
+        e instanceof Error ? e.message : 'An unknown error occurred'
+      );
+    } finally {
+      setIsEditing(false);
+    }
+  }
+
   return (
     <div className="max-w-2xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Create New Post</h1>
@@ -118,7 +178,7 @@ export default function NewPostPage() {
           />
         </div>
 
-        <div>
+        <div className='mb-1'>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Image
           </label>
@@ -146,6 +206,19 @@ export default function NewPostPage() {
           )}
         </div>
 
+        {previewImage && (
+          <div className="flex justify-front">
+            <button
+              type="button"
+              onClick={() => setShowModal(true)}
+              disabled={isSubmitting}
+              className="px-2 py-1 bg-indigo-600 text-sm text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Edit Image
+            </button>
+          </div>
+        )}
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Caption
@@ -169,6 +242,36 @@ export default function NewPostPage() {
           </button>
         </div>
       </form>
+
+      <Modal show={showModal} onClose={() => setShowModal(false)}>
+        {previewImage && (
+          <div className="mt-2">
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="max-w-full h-auto max-h-80 rounded-md"
+            />
+          </div>
+        )}
+        <div className="my-1">
+          <button
+            type="button"
+            onClick={() => {handleEditImage(`grayscale`)}}
+            disabled={isEditing}
+            className="mr-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Grayscale
+          </button>
+          <button
+            type="button"
+            onClick={() => {handleEditImage(`resize`)}}
+            disabled={isEditing}
+            className="mr-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Resize
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -4,5 +4,6 @@
     ".vscode{,/**}"
   ],
   "appService.defaultWebAppToDeploy": "/subscriptions/1ae42605-f7c2-4742-a3b5-8655d8868668/resourceGroups/cs554finalpro_group/providers/Microsoft.Web/sites/cs554finalproj",
-  "appService.deploySubpath": "."
+  "appService.deploySubpath": ".",
+  "editor.tabSize": 2
 }
