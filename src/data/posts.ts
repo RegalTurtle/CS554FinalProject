@@ -314,7 +314,6 @@ export const likePost = async (
   try {
     if (typeof userId === 'string')
       userId = userId.trim();
-
     const postObj = await getPostById(postId);
     const post: Post | undefined = postObj.post;
     if (post === undefined)
