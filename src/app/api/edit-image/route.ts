@@ -50,6 +50,10 @@ export async function POST(request: Request) {
         case 'grayscale':
           await im.grayScaleImage(filePath, newFilePath);
           break;
+        case 'crop':
+          const { widthPercent, heightPercent, offsetHorizontalPercent, offsetVerticalPercent } = data.additionalData;
+          await im.cropImage(filePath, newFilePath, widthPercent, heightPercent, offsetHorizontalPercent, offsetVerticalPercent);
+          break;
         default:
           return NextResponse.json(
             { message: `Unknown operation` },
