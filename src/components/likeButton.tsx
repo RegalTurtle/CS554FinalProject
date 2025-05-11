@@ -24,7 +24,7 @@ export default function LikeButton(props: Props) {
 		await likePost(props.userId, props.postId);
 		setIsLiked(!isLiked);
 	}}>
-		{isLiked ? "Unlike" : "Like"}
+		{isLiked ? "♥ Unlike" : "♥ Like"}
 	</button>
 	);
 }
