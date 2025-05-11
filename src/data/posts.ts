@@ -2,6 +2,8 @@ import { ObjectId } from 'mongodb';
 import { posts, users } from '@/src/config/mongoCollections.js';
 import { Buffer } from 'buffer';
 import * as redis from 'redis';
+import {getUser} from "./users";
+
 // const client = redis.createClient({ url: `redis://173.3.80.96:6379` });
 const client = redis.createClient();
 await client.connect();
@@ -14,8 +16,13 @@ export interface Post {
   imageMimeType?: string
   caption: string;
   likedUsers: (ObjectId | string)[];
-  comments: (ObjectId | string)[];
+  comments: Comment[];
 
+}
+
+export interface Comment {
+  userId: ObjectId | string;
+  text: string;
 }
 
 export const createPost = async (
@@ -69,7 +76,7 @@ export const createPost = async (
       throw new Error('Error: Failed to update user with the new post.');
     }
 
-    await client.del(`allPosts}`);
+    await client.del(`allPosts`);
     await client.del(`allPosts-${userId.toString()}`);
     // Set Cache with Post Id
 
@@ -88,7 +95,7 @@ export const getPostById = async (
   id: ObjectId | string
 ): Promise<{ postFound: boolean; post?: Post }> => {
   try {
-    if (typeof id === 'string') id.trim();
+    if (typeof id === 'string') id = id.trim();
 
     // Check if it is in Cache
 
@@ -248,7 +255,7 @@ export const getAllPostsByUser = async (userId: ObjectId | string): Promise<{
   allPosts?: Post[];
 }> => {
   try {
-    if (typeof userId === 'string') userId.trim();
+    if (typeof userId === 'string') userId = userId.trim();
     // Check if it is in Cache
 
     const cache = await client.get(`allPosts-${userId.toString()}`);
@@ -275,3 +282,45 @@ export const getAllPostsByUser = async (userId: ObjectId | string): Promise<{
     throw new Error('Unable to get posts');
   }
 };
+
+export const likePost = async (
+  userId: ObjectId | string,
+  postId: ObjectId | string
+): Promise<{
+  postUpdated: boolean;
+  updatedPost?: Post;
+}> => {
+  try {
+    if (typeof userId === 'string')
+      userId = userId.trim();
+    
+    const post = await getPostById(postId);
+
+  } catch (e) {
+    console.error(e);
+    return {postUpdated: false};
+  }
+};
+
+export const createComment = async (
+  userId: ObjectId | string,
+  postId: ObjectId | string,
+  text: string
+): Promise<{
+  commentCreated: boolean;
+  comment?: Comment;
+}> => {
+  try {
+    if (typeof userId === 'string')
+      userId = userId.trim();
+    
+    const postObj = await getPostById(postId);
+    const post: Post | undefined = postObj.post;
+    if (post === undefined)
+      throw `no post with ID ${postId}`;
+
+  } catch (e) {
+    console.error(e);
+    return {commentCreated: false};
+  }
+}
