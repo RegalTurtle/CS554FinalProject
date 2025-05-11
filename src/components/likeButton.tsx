@@ -1,12 +1,34 @@
-import {useState} from "react";
-import {likePost} from "../data/posts";
+import {ObjectId} from "mongodb";
+import {useState, useEffect} from "react";
+import {checkIfLiked, likePost} from "@/src/data/posts";
 
-export default function LikeButton(props: unknown) {
+interface Props {
+	userId: ObjectId | string,
+	postId: ObjectId | string
+}
+
+export default function LikeButton(props: Props) {
 	const [isLiked, setIsLiked] = useState(false);
 
-	return (
-	<button>
+	useEffect(() =>
+	{
+		const checkIfLikedFunc = (): void =>
+		{
+			const checkIfLikedFuncInAFunc = async (): Promise<boolean> =>
+				await checkIfLiked(props.userId, props.postId);
+			
+			checkIfLikedFuncInAFunc().then((result: boolean) =>
+			setIsLiked(result));
+		};
+		checkIfLikedFunc();
+	});
 
+	return (
+	<button onClick={async () => {
+		await likePost(props.userId, props.postId);
+		setIsLiked(!isLiked);
+	}}>
+		{isLiked ? "Unlike" : "Like"}
 	</button>
 	);
 }
