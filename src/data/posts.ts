@@ -294,7 +294,44 @@ export const likePost = async (
     if (typeof userId === 'string')
       userId = userId.trim();
     
-    const post = await getPostById(postId);
+    const postObj = await getPostById(postId);
+    const post: Post | undefined = postObj.post;
+    if (post === undefined)
+      throw `no post with ID ${postId}`;
+
+    const userObjId: ObjectId = new ObjectId(userId);
+    let newLikedUsers: (ObjectId | string)[] = post.likedUsers;
+
+    if (newLikedUsers.includes(userObjId)) {
+      newLikedUsers = newLikedUsers.filter((elem) => elem !== userObjId);
+    } else {
+      newLikedUsers.push(userObjId);
+    }
+
+    const postCollection = await posts();
+    const updatedPost: Post | undefined = await postCollection.updateOne({
+        _id: new ObjectId(postId)
+      }, {
+        $set: {
+          likedUsers: newLikedUsers
+        }
+      }
+    );
+    if (!updatedPost)
+      throw "failed to update post";
+
+    const newPost: Post = await postCollection.findOne({_id: new ObjectId(postId)});
+    await client.del(`post${postId}`);
+    await client.del(`allPosts}`);
+    await client.del(`allPosts-${updatedPost.userId.toString()}`);
+    await client.set(`post${postId}`, JSON.stringify(updatedPost));
+    await client.expire(`post${postId}`, 3600);
+    console.log(`updatePost: Post Updated into Cache!`);
+
+    return {
+      postUpdated: true,
+      updatedPost: newPost
+    }
 
   } catch (e) {
     console.error(e);
@@ -307,10 +344,13 @@ export const createComment = async (
   postId: ObjectId | string,
   text: string
 ): Promise<{
-  commentCreated: boolean;
-  comment?: Comment;
+  postUpdated: boolean;
+  updatedPost?: Post;
 }> => {
   try {
+    if (text.length === 0)
+      throw "comment cannot be empty";
+
     if (typeof userId === 'string')
       userId = userId.trim();
     
@@ -319,8 +359,40 @@ export const createComment = async (
     if (post === undefined)
       throw `no post with ID ${postId}`;
 
+    const comment: Comment = {
+      userId: new ObjectId(userId),
+      text: text
+    };
+    let newComments = post.comments;
+    newComments.push(comment);
+
+    const postCollection = await posts();
+    const updatedPost: Post | undefined = await postCollection.updateOne({
+        _id: new ObjectId(postId)
+      }, {
+        $set: {
+          comments: newComments
+        }
+      }
+    );
+    if (!updatedPost)
+      throw "failed to update post";
+
+    const newPost: Post = await postCollection.findOne({_id: new ObjectId(postId)});
+    await client.del(`post${postId}`);
+    await client.del(`allPosts}`);
+    await client.del(`allPosts-${updatedPost.userId.toString()}`);
+    await client.set(`post${postId}`, JSON.stringify(updatedPost));
+    await client.expire(`post${postId}`, 3600);
+    console.log(`updatePost: Post Updated into Cache!`);
+
+    return {
+      postUpdated: true,
+      updatedPost: newPost
+    }
+
   } catch (e) {
     console.error(e);
-    return {commentCreated: false};
+    return {postUpdated: false};
   }
 }
