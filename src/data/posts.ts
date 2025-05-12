@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import { posts, users } from '@/src/config/mongoCollections.js';
 import { Buffer } from 'buffer';
 import * as redis from 'redis';
-import {getUser} from "./users";
+import { getUser } from './users';
 
 // const client = redis.createClient({ url: `redis://173.3.80.96:6379` });
 const client = redis.createClient();
@@ -16,7 +16,6 @@ export interface Post {
   caption: string;
   likedUsers: (ObjectId | string)[];
   comments: Comment[];
-
 }
 
 export interface Comment {
@@ -48,7 +47,7 @@ export const createPost = async (
       image: image,
       caption: caption,
       likedUsers: [],
-      comments: []
+      comments: [],
     };
 
     const insertPost = await postCollection.insertOne(newPost);
@@ -195,7 +194,7 @@ export const updatePost = async (
     // Since it is Mutation, we delete getAllPosts, postById (all queries)
 
     await client.del(`post${id}`);
-    await client.del(`allPosts}`);
+    await client.del(`allPosts`);
     await client.del(`allPosts-${updatedPost.userId.toString()}`);
     // Add the updated Post into cache.
 
@@ -249,7 +248,9 @@ export const deletePost = async (
   }
 };
 
-export const getAllPostsByUser = async (userId: ObjectId | string): Promise<{
+export const getAllPostsByUser = async (
+  userId: ObjectId | string
+): Promise<{
   allPostsFound: boolean;
   allPosts?: Post[];
 }> => {
@@ -262,13 +263,15 @@ export const getAllPostsByUser = async (userId: ObjectId | string): Promise<{
       console.log('getAllPosts: All Posts is Cached');
       return JSON.parse(cache);
     }
-    console.log(userId)
+    console.log(userId);
     // If not get from Database
     const postCollection = await posts();
-    const allPosts = await postCollection.find({ userId: new ObjectId(userId) }).toArray();
+    const allPosts = await postCollection
+      .find({ userId: new ObjectId(userId) })
+      .toArray();
     if (!allPosts) throw new Error('getAllPosts: All Posts Not Found.');
     allPosts.map((post: Post) => {
-      post.image = post.image.toString()
+      post.image = post.image.toString();
     });
     // Cache
 
@@ -287,16 +290,13 @@ export const checkIfLiked = async (
   postId: ObjectId | string
 ): Promise<boolean> => {
   try {
-    if (typeof userId === 'string')
-      userId = userId.trim();
-    
+    if (typeof userId === 'string') userId = userId.trim();
+
     const postObj = await getPostById(postId);
     const post: Post | undefined = postObj.post;
-    if (post === undefined)
-      throw `no post with ID ${postId}`;
+    if (post === undefined) throw `no post with ID ${postId}`;
 
     return post.likedUsers.includes(new ObjectId(userId));
-
   } catch (e) {
     console.error(e);
     return false;
@@ -311,13 +311,11 @@ export const likePost = async (
   updatedPost?: Post;
 }> => {
   try {
-    if (typeof userId === 'string')
-      userId = userId.trim();
-    
+    if (typeof userId === 'string') userId = userId.trim();
+
     const postObj = await getPostById(postId);
     const post: Post | undefined = postObj.post;
-    if (post === undefined)
-      throw `no post with ID ${postId}`;
+    if (post === undefined) throw `no post with ID ${postId}`;
 
     const userObjId: ObjectId = new ObjectId(userId);
     let newLikedUsers: (ObjectId | string)[] = post.likedUsers;
@@ -329,20 +327,23 @@ export const likePost = async (
     }
 
     const postCollection = await posts();
-    const updatedPost: Post | undefined = await postCollection.updateOne({
-        _id: new ObjectId(postId)
-      }, {
+    const updatedPost: Post | undefined = await postCollection.updateOne(
+      {
+        _id: new ObjectId(postId),
+      },
+      {
         $set: {
-          likedUsers: newLikedUsers
-        }
+          likedUsers: newLikedUsers,
+        },
       }
     );
-    if (!updatedPost)
-      throw "failed to update post";
+    if (!updatedPost) throw 'failed to update post';
 
-    const newPost: Post = await postCollection.findOne({_id: new ObjectId(postId)});
+    const newPost: Post = await postCollection.findOne({
+      _id: new ObjectId(postId),
+    });
     await client.del(`post${postId}`);
-    await client.del(`allPosts}`);
+    await client.del(`allPosts`);
     await client.del(`allPosts-${updatedPost.userId.toString()}`);
     await client.set(`post${postId}`, JSON.stringify(updatedPost));
     await client.expire(`post${postId}`, 3600);
@@ -350,12 +351,11 @@ export const likePost = async (
 
     return {
       postUpdated: true,
-      updatedPost: newPost
-    }
-
+      updatedPost: newPost,
+    };
   } catch (e) {
     console.error(e);
-    return {postUpdated: false};
+    return { postUpdated: false };
   }
 };
 
@@ -368,37 +368,37 @@ export const createComment = async (
   updatedPost?: Post;
 }> => {
   try {
-    if (text.length === 0)
-      throw "comment cannot be empty";
+    if (text.length === 0) throw 'comment cannot be empty';
 
-    if (typeof userId === 'string')
-      userId = userId.trim();
-    
+    if (typeof userId === 'string') userId = userId.trim();
+
     const postObj = await getPostById(postId);
     const post: Post | undefined = postObj.post;
-    if (post === undefined)
-      throw `no post with ID ${postId}`;
+    if (post === undefined) throw `no post with ID ${postId}`;
 
     const comment: Comment = {
       userId: new ObjectId(userId),
-      text: text
+      text: text,
     };
     let newComments = post.comments;
     newComments.push(comment);
 
     const postCollection = await posts();
-    const updatedPost: Post | undefined = await postCollection.updateOne({
-        _id: new ObjectId(postId)
-      }, {
+    const updatedPost: Post | undefined = await postCollection.updateOne(
+      {
+        _id: new ObjectId(postId),
+      },
+      {
         $set: {
-          comments: newComments
-        }
+          comments: newComments,
+        },
       }
     );
-    if (!updatedPost)
-      throw "failed to update post";
+    if (!updatedPost) throw 'failed to update post';
 
-    const newPost: Post = await postCollection.findOne({_id: new ObjectId(postId)});
+    const newPost: Post = await postCollection.findOne({
+      _id: new ObjectId(postId),
+    });
     await client.del(`post${postId}`);
     await client.del(`allPosts}`);
     await client.del(`allPosts-${updatedPost.userId.toString()}`);
@@ -408,11 +408,10 @@ export const createComment = async (
 
     return {
       postUpdated: true,
-      updatedPost: newPost
-    }
-
+      updatedPost: newPost,
+    };
   } catch (e) {
     console.error(e);
-    return {postUpdated: false};
+    return { postUpdated: false };
   }
-}
+};
