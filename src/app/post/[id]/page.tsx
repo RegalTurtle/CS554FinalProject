@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
+import LikeButton from "@/src/components/likeButton";
+import CommentButton from "@/src/components/commentButton";
+import { User } from '@/src/data/users';
 
 interface Post {
   _id: string;
@@ -14,11 +17,15 @@ interface Post {
   comments: any[];
 }
 
+type PublicUser = Omit<User, 'password'>;
+
 export default function SingularPostPage() {
   const { id } = useParams();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const [sessionUser, setSessionUser] = useState<PublicUser | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -92,6 +99,9 @@ export default function SingularPostPage() {
       {post.likedUsers.length === 0 && post.comments.length === 0 && (
         <p className="text-gray-500">No likes or comments yet.</p>
       )}
+
+      <LikeButton userId="" postId={post._id} />
+      <CommentButton userId="" postId={post._id} />
     </div>
   );
 }
