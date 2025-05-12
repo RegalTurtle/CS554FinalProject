@@ -5,6 +5,7 @@ import { getPosts } from '@/src/app/user/actions';
 import { User } from '@/src/data/users';
 import { Post } from '@/src/data/posts';
 import Image from 'next/image';
+import Link from 'next/link';
 type PublicUser = Omit<User, 'password'>;
 export const dynamic = 'force-dynamic';
 export default function UserPosts({ profileUser }: { profileUser: PublicUser }) {
