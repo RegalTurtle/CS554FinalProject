@@ -16,11 +16,15 @@ interface Post {
   comments: any[];
 }
 
+type PublicUser = Omit<User, 'password'>;
+
 export default function SingularPostPage() {
   const { id } = useParams();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const [sessionUser, setSessionUser] = useState<PublicUser | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
