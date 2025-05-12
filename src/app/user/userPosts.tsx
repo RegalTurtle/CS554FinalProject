@@ -7,6 +7,7 @@ import { Post } from '@/src/data/posts';
 import Image from 'next/image';
 import Link from 'next/link';
 import LikeButton from "@/src/components/likeButton";
+
 type PublicUser = Omit<User, 'password'>;
 export const dynamic = 'force-dynamic';
 export default function UserPosts({
