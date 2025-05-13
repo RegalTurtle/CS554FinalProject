@@ -53,7 +53,7 @@ export default function SingularPostPage() {
       <div className="relative mb-4 w-full h-96">
         <Image
           src={`data:image/jpeg;base64,${post.image}`} // Base64-encoded string
-          alt={post.title}
+          alt={post.title || 'Post image'}
           layout="fill"
           objectFit="cover"
           className="rounded-md"
