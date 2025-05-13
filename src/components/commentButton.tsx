@@ -1,3 +1,5 @@
+"use client";
+
 import {ObjectId} from "mongodb";
 import {useState, useEffect} from "react";
 import {createComment} from "@/src/data/posts";
