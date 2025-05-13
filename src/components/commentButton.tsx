@@ -1,24 +1,18 @@
 "use client";
 
-import {ObjectId} from "mongodb";
 import {useState, useEffect} from "react";
-import {createComment} from "@/src/data/posts";
-import { usePathname } from 'next/navigation';
-import type { SessionPayload } from '@/src/lib/session';
+import {SessionPayload} from "@/src/lib/session";
+import {usePathname} from "next/navigation";
 
 interface Props {
-	postId: ObjectId | string
+	postId: string
 }
 
 export default function CommentButton(props: Props) {
-	const [box, setBox] = useState(false);
-
-	const pathname = usePathname();
+	const pathname = usePathname;
 	const [session, setSession] = useState<SessionPayload | undefined | null>(null);
-
-	let userId = undefined;
-	if (session?.userId)
-		userId = session.userId;
+	const [error, setError] = useState("");
+	const [box, setBox] = useState(false);
 
 	useEffect(() => {
 		async function fetchData() {
@@ -27,13 +21,12 @@ export default function CommentButton(props: Props) {
 			let { session } = data;
 			setSession(session);
 		}
-
 		fetchData();
-	}, [pathname]);
+    	}, [pathname]);
 
 	return (
 	<>
-	{userId &&
+	{session?.userId &&
 	<div>
 		<button onClick={() => setBox(!box)}>Comment</button>
 
@@ -42,14 +35,42 @@ export default function CommentButton(props: Props) {
 			<input id="commentBox" type="text" name="commentBox" />
 
 			<button type="submit" onClick={async () => {
-				const text: string | null = 
+				const text: string | null =
 				(document.getElementById("commentBox") as HTMLInputElement).value;
-				if (text !== null) {
-					await createComment(userId, props.postId, text);
+				
+				try {
+					if (text === null || text === "")
+						throw "comment cannot be empty";
+
+					const data = {
+						postId: props.postId,
+						text: text
+					};
+					const response = await fetch("/api/comment-button", {
+						method: "PATCH",
+						headers: {"Content-Type": "application/json"},
+						body: JSON.stringify(data)
+					});
+					if (!response.ok) {
+						const errorData = await response.json();
+						throw errorData.message;
+					}
+
+				} catch (e) {
+					console.error("Error creating comment: ", e);
+					setError(e instanceof Error ? e.message : "An unknown error occurred");
+				} finally {
 					setBox(false);
 				}
-			}}>Submit</button>
+			}}>
+				Submit
+			</button>
 		</form>}
+	</div>}
+
+	{error &&
+	<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+		{error}
 	</div>}
 	</>
 	);
