@@ -287,24 +287,6 @@ export const getAllPostsByUser = async (
   }
 };
 
-export const checkIfLiked = async (
-  userId: ObjectId | string,
-  postId: ObjectId | string
-): Promise<boolean> => {
-  try {
-    if (typeof userId === 'string') userId = userId.trim();
-
-    const postObj = await getPostById(postId);
-    const post: Post | undefined = postObj.post;
-    if (post === undefined) throw `no post with ID ${postId}`;
-
-    return post.likedUsers.includes(new ObjectId(userId));
-  } catch (e) {
-    console.error(e);
-    return false;
-  }
-};
-
 export const likePost = async (
   userId: ObjectId | string,
   postId: ObjectId | string

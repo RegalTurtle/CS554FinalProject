@@ -95,10 +95,11 @@ export default function SingularPostPage() {
         <p className="text-gray-500">No likes or comments yet.</p>
       )}
 
-      {/* <div>
+      {/* Only appears if the user is logged in */}
+      <div>
         <LikeButton postId={post._id} />
         <CommentButton postId={post._id} />
-      </div> */}
+      </div>
     </div>
   );
 }

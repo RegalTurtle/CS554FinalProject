@@ -1,24 +1,17 @@
 "use client";
 
-import {ObjectId} from "mongodb";
 import {useState, useEffect} from "react";
-import {checkIfLiked, likePost} from "@/src/data/posts";
-import { usePathname } from 'next/navigation';
-import type { SessionPayload } from '@/src/lib/session';
+import {SessionPayload} from "@/src/lib/session";
+import {usePathname} from "next/navigation";
 
 interface Props {
-	postId: ObjectId | string
+	postId: string
 }
 
 export default function LikeButton(props: Props) {
-	const [isLiked, setIsLiked] = useState(false);
-
-	const pathname = usePathname();
+	const pathname = usePathname;
 	const [session, setSession] = useState<SessionPayload | undefined | null>(null);
-
-	let userId = undefined;
-	if (session?.userId)
-		userId = session.userId;
+	const [error, setError] = useState("");
 
 	useEffect(() => {
 		async function fetchData() {
@@ -27,32 +20,40 @@ export default function LikeButton(props: Props) {
 			let { session } = data;
 			setSession(session);
 		}
-
 		fetchData();
     	}, [pathname]);
-	
-	useEffect(() =>
-	{
-		if (userId) {
-			const checkIfLikedFunc = async (): Promise<boolean> =>
-				await checkIfLiked(userId, props.postId);
-		
-			checkIfLikedFunc().then((result: boolean) =>
-			setIsLiked(result));
-		}
-		
-	});
 
 	return (
 	<>
-	{userId &&
-	<button onClick={async () => {
-		await likePost(userId, props.postId);
-		setIsLiked(!isLiked);
+	{session?.userId &&
+	<button onClick={async (e: React.FormEvent) => {
+		e.preventDefault();
+
+		const data = {postId: props.postId};
+		
+		try {
+			const response = await fetch("/api/like-button", {
+				method: "PATCH",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify(data)
+			});
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw errorData.message;
+			}
+
+		} catch (e) {
+			console.error("Error (un)liking post: ", e);
+			setError(e instanceof Error ? e.message : "An unknown error occurred");
+		}
 	}}>
-		{isLiked ? "♥ Unlike" : "♥ Like"}
-	</button>
-	}
+		♥ Like/Unlike
+	</button>}
+
+	{error &&
+	<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+		{error}
+	</div>}
 	</>
 	);
 }
