@@ -5,19 +5,16 @@ import {ObjectId} from "mongodb";
 
 export async function PATCH(request: Request) {
 	let session: any;
-	let userId: ObjectId | string;
+	let userId: ObjectId | string | undefined = undefined;
 
 	try {
 		session = await getSession();
 		if (session?.userId) {
 			userId = session.userId;
-		} else return NextResponse.json(
-			{message: "No session found"},
-			{status: 400}
-		);
+		}
 
 		const data = await request.json();
-		const result = await createComment(userId, data.postId, data.text);
+		const result = await createComment(data.postId, data.text, userId);
 		if (!result.postUpdated) {
 			return NextResponse.json(
 				{message: "Failed to create comment"},
