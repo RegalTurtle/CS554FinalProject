@@ -25,9 +25,9 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white text-gray-800 flex flex-col items-center justify-center px-6 py-16">
       <section className="max-w-4xl text-center">
-        <h1 className="text-5xl font-extrabold mb-6">
+        {/* <h1 className="text-5xl font-extrabold mb-6">
           Welcome to
-        </h1>
+        </h1> */}
         <div className="flex justify-center items-center w-full">
           <Image alt="A spider web divided horizontally in the middle with the words THE WEB in blue filling the gap"
           src="/the_web.png" />
