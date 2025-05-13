@@ -31,34 +31,39 @@ export async function editProfile(data: any) {
 }
 
 export async function createUser(
-    prevState: FormState,
-    formData: FormData
-): Promise<FormState> {
-    const firstName = formData.get('firstName');
-    const lastName = formData.get('lastName');
-    const email = formData.get('email');
-    const password = formData.get('password');
+    {
+        firstName,
+        lastName,
+        email,
+        password
+    }: {
+        firstName: string,
+        lastName: string,
+        email: string,
+        password: string
+    }
+) {
 
-    const errors: string[] = [];
+    let error: string;
 
     if (typeof firstName !== 'string' || !firstName.trim()) {
-        errors.push('First name is required.');
+        error = 'First name is required.';
+        return { message: error };
     }
 
     if (typeof lastName !== 'string' || !lastName.trim()) {
-        errors.push('Last name is required.');
+        error = ('Last name is required.');
+        return { message: error };
     }
 
     if (typeof email !== 'string' || !email.trim()) {
-        errors.push('Email is required.');
+        error = ('Email is required.');
+        return { message: error };
     }
 
     if (typeof password !== 'string' || !password.trim()) {
-        errors.push('Password is required.');
-    }
-
-    if (errors.length > 0) {
-        return { message: errors };
+        error = ('Password is required.');
+        return { message: error };
     }
 
     try {
@@ -72,34 +77,35 @@ export async function createUser(
         console.log(error)
         return {
 
-            message: [error.message || 'An error occurred during registration.'],
+            error: error.message || 'An error occurred during registration.',
         };
     }
-    redirect(`/user/login`); // Navigate to new route
 
 }
 
 
 
 export async function login(
-    prevState: FormState,
-    formData: FormData
-): Promise<FormState> {
-    const email = formData.get('email');
-    const password = formData.get('password');
+    {
+        email,
+        password
+    }: {
+        email: string,
+        password: string
+    }
+) {
 
-    const errors: string[] = [];
+    let error: string;
 
     if (typeof email !== 'string' || !email.trim()) {
-        errors.push('Email is required.');
+        error = ('Email is required.');
+        return { message: error };
     }
 
     if (typeof password !== 'string' || !password.trim()) {
-        errors.push('Password is required.');
-    }
+        error = ('Password is required.');
+        return { message: error };
 
-    if (errors.length > 0) {
-        return { message: errors };
     }
     let user;
     try {
@@ -107,13 +113,12 @@ export async function login(
             email as string,
             password as string
         );
+        await createSession(user._id);
     } catch (error: any) {
         return {
-            message: [error.message || 'An error occurred during login.'],
+            error: error.message || 'An error occurred during login.',
         };
     }
-    await createSession(user._id);
-    redirect(`/user/${user._id.toString()}`);
 
 }
 
