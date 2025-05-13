@@ -1,5 +1,4 @@
 "use client";
-import { use } from 'react';
 import { useState, useEffect } from 'react';
 import { requestFriend, acceptFriend } from '@/src/app/user/actions';
 import type { Friend as FriendType } from '@/src/data/users';

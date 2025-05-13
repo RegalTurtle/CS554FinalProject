@@ -1,7 +1,6 @@
 'use client';
 import { use } from 'react';
 import { useState, useEffect } from 'react';
-import { getPosts } from '@/src/app/user/actions';
 import { User } from '@/src/data/users';
 import UserPosts from '../userPosts';
 import IndividualUser from '../individualUser';
@@ -21,6 +20,9 @@ export default function profile({
     const response = await fetch(`/api/user/${id}`);
     const data = await response.json();
     setUser(data.user);
+    if (sessionUser && sessionUser._id == id) {
+      setSessionUser(data.user)
+    }
   }
 
   useEffect(() => {
@@ -124,6 +126,7 @@ export default function profile({
               <IndividualUser
                 profileId={friend.userId.toString()}
                 sessionUser={sessionUser}
+                updateFriends={(sessionUser && sessionUser._id == id) ? fetchUserData : undefined}
               />
             </Link>
           ))}
@@ -138,7 +141,7 @@ export default function profile({
 
   return (
     <div className="w-full max-w-6xl mx-auto px-6">
-      <IndividualUser profileId={id} sessionUser={sessionUser} />
+      <IndividualUser key={`${id}-${user?.friends?.filter(item => item.status === "friend").length}`} profileId={id} sessionUser={sessionUser} />
 
       <div className="w-full mt-6">
         <div className="flex border-b border-gray-200">
@@ -178,7 +181,7 @@ export default function profile({
 
         <div className="mt-4">
           <div data-content="posts">
-            {user && <UserPosts profileUser={user} />}
+            {user && <UserPosts profileUserId={id} />}
           </div>
           <div data-content="friends" className="hidden">
             {mapFriends}
