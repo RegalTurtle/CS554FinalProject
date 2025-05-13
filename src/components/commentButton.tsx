@@ -22,7 +22,9 @@ export default function CommentButton(props: Props) {
 			id="commentBox" type="text" name="commentBox" />
 
 			<button className="border border-gray-300 rounded-md"
-			type="submit" onClick={async () => {
+			type="submit" onClick={async (e: React.FormEvent) => {
+				e.preventDefault();
+				
 				const text: string | null =
 				(document.getElementById("commentBox") as HTMLInputElement).value;
 				
