@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { ObjectId } from 'mongodb';
-import { users } from '@/src/config/mongoCollections.js';
+import { users, posts } from '@/src/config/mongoCollections.js';
 import { env } from '@/src/config/settings.js';
 import fs from 'fs';
 import path from 'path';
