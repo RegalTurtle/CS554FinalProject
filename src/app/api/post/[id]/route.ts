@@ -15,7 +15,7 @@ export async function GET(
     const { id } = await context.params;
     post = await getPostById(id);
   } catch (error: any) {
-    return NextResponse.json({ error: error }, { status: 500 });
+    return NextResponse.json({ error }, { status: 500 });
   } finally {
     return NextResponse.json({ post: post }, { status: 200 });
   }

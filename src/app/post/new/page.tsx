@@ -24,6 +24,9 @@ export default function NewPostPage() {
   const [offsetHorizontalPercent, setOffsetHorizontalPercent] = useState(0);
   const [offsetVerticalPercent, setOffsetVerticalPercent] = useState(0);
 
+  // State for blurring
+  const [blurValue, setBlurValue] = useState(1);
+
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -134,6 +137,15 @@ export default function NewPostPage() {
 
       if (operation === 'crop') {
         postData.additionalData = { widthPercent, heightPercent, offsetHorizontalPercent, offsetVerticalPercent };
+        setWidthPercent(100);
+        setHeightPercent(100);
+        setOffsetHorizontalPercent(0);
+        setOffsetVerticalPercent(0);
+      }
+
+      if (operation === 'blur') {
+        postData.additionalData = { blurValue };
+        setBlurValue(1);
       }
 
       // Send to API
@@ -287,8 +299,9 @@ export default function NewPostPage() {
           {/* The crop button + inputs */}
           <div className="flex flex-col my-2 border rounded p-2">
             <div className='flex'>
-              <label className='p-2'>Width %</label>
+              <label className='p-2' htmlFor="width-percent">Width %</label>
               <input 
+                id="width-percent"
                 type="number"
                 placeholder="100"
                 value={widthPercent}
@@ -298,8 +311,9 @@ export default function NewPostPage() {
                 className="w-20 mr-2 px-2 py-2 border rounded text-sm"
               />
               <p className="inline mr-2 py-2">x</p>
-              <label className='p-2'>Height %</label>
+              <label className='p-2' htmlFor="height-percent">Height %</label>
               <input 
+                id="height-percent"
                 type="number"
                 placeholder="100"
                 value={heightPercent}
@@ -311,8 +325,9 @@ export default function NewPostPage() {
             </div>
 
             <div className='flex'>
-              <label className='p-2'>Horizontal Offset %</label>
+              <label className='p-2' htmlFor="horizontal-offset-percent">Horizontal Offset %</label>
               <input 
+                id="horizontal-offset-percent"
                 type="number"
                 placeholder="0"
                 value={offsetHorizontalPercent}
@@ -322,8 +337,9 @@ export default function NewPostPage() {
                 className="w-20 mr-2 px-2 py-2 border rounded text-sm"
               />
               <p className="inline mr-2 py-2">x</p>
-              <label className='p-2'>Vertical Offset %</label>
+              <label className='p-2' htmlFor="vertical-offset-percent">Vertical Offset %</label>
               <input 
+                id="vertical-offset-percent"
                 type="number"
                 placeholder="0"
                 value={offsetVerticalPercent}
@@ -344,26 +360,29 @@ export default function NewPostPage() {
             </button>
           </div>
 
-          {/* The resize button + inputs */}
-          <div>
-            <input 
-              type="text"
+          {/* The blur button */}
+          <div className="flex my-2 border rounded p-2">
+            <label htmlFor="blur-slider" className="p-3">Blur Effect:</label>
+            <input
+              id="blur-slider"
+              type="range"
+              placeholder="1"
+              value={blurValue}
+              onChange={(e) => setBlurValue(Number(e.target.value))}
+              min="1"
+              max="10"
               className="w-20 mr-2 px-2 py-2 border rounded text-sm"
+              step="1"
             />
-            <p
-              className="inline mr-2"
-            >x</p>
-            <input 
-              type="text"
-              className="w-20 mr-2 px-2 py-2 border rounded text-sm"
-            />
+            <span id="blur-value" className="p-3">{blurValue}</span>
+
             <button
               type="button"
-              onClick={() => {handleEditImage(`resize`)}}
+              onClick={() => {handleEditImage(`blur`)}}
               disabled={isEditing}
-              className="mt-2 mr-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-20 px-2 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Resize
+              Blur
             </button>
           </div>
         </div>

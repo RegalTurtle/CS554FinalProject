@@ -1,17 +1,18 @@
 'use client';
 import { use } from 'react';
 import { useState, useEffect } from 'react';
-import { getPosts } from '@/src/app/user/actions';
 import { User } from '@/src/data/users';
 import { Post } from '@/src/data/posts';
 import Image from 'next/image';
 import Link from 'next/link';
+import LikeButton from "@/src/components/likeButton";
+
 type PublicUser = Omit<User, 'password'>;
 export const dynamic = 'force-dynamic';
 export default function UserPosts({
-  profileUser,
+  profileUserId,
 }: {
-  profileUser: PublicUser;
+  profileUserId: string;
 }) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [message, setMessage] = useState<string[] | null>(null);
@@ -21,7 +22,7 @@ export default function UserPosts({
     async function fetchData() {
       setLoading(true);
       try {
-        const response = await fetch(`/api/user/posts/${profileUser._id}`);
+        const response = await fetch(`/api/user/posts/${profileUserId}`);
         const data = await response.json();
         if (data.posts) {
 
@@ -62,7 +63,9 @@ export default function UserPosts({
                 />
               </div>
               <h3 className="mt-2 text-lg font-semibold text-center">
-                {post.title}
+                <Link href={`/post/${post._id}`}>
+                  {post.title}
+                </Link>
               </h3>
             </div>
           ))}
