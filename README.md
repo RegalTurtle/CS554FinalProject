@@ -11,5 +11,6 @@ To set up, follow these instructions:
 4. If using ImageMagick, ensure IM is installed via `sudo apt install imagemagick` or similar using a package manager
     1. ImageMagick features require ImageMagick to be installed
     2. Some ImageMagick features are not available on Windows, such as grayscale
-5. To run dev mode on the website, `npm run dev`
+5. If you would like to get a small seed of data, you have to use the route `GET /api/seed/`. Look in the file to see a couple of the provided usernames and passwords
+6. To run dev mode on the website, `npm run dev`
     1. To compile, run `npm run build` and `npm run start`
