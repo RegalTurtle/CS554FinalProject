@@ -1,27 +1,13 @@
 "use client";
 
-import {useState, useEffect} from "react";
-import {SessionPayload} from "@/src/lib/session";
-import {usePathname} from "next/navigation";
+import {useState} from "react";
 
 interface Props {
 	postId: string
 }
 
 export default function LikeButton(props: Props) {
-	const pathname = usePathname;
-	const [session, setSession] = useState<SessionPayload | undefined | null>(null);
 	const [error, setError] = useState("");
-
-	useEffect(() => {
-		async function fetchData() {
-			const response = await fetch(`/api/session`);
-			const data = await response.json();
-			let { session } = data;
-			setSession(session);
-		}
-		fetchData();
-    	}, [pathname]);
 
 	return (
 	<>
