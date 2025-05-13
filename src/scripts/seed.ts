@@ -30,9 +30,9 @@ export const seed = async (): Promise<void> => {
   const { postCreated, post } = await createPost(thysObj._id, "HCI Figure 1", image1Buffer, "This is one of my charts from my HCI paper this semester.");
   if (!postCreated) throw new Error('Post not created');
   if (typeof post !== 'undefined') {
-    await likePost(annikaObj._id, post?._id);
+    await likePost(post?._id, annikaObj._id);
     console.log('post liked');
-    await createComment(annikaObj._id, post?._id, 'This is a cool image')
+    await createComment(post?._id, 'This is a cool image', annikaObj._id)
     console.log('post commented');
   }
 };
