@@ -35,6 +35,4 @@ export const seed = async (): Promise<void> => {
     await createComment(annikaObj._id, post?._id, 'This is a cool image')
     console.log('post commented');
   }
-
-  console.log(await getAllPostsByUser(thysObj._id.toString()));
 };
