@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
+import LikeButton from "@/src/components/likeButton";
+import CommentButton from "@/src/components/commentButton";
 
 interface Post {
   _id: string;
@@ -92,6 +94,11 @@ export default function SingularPostPage() {
       {post.likedUsers.length === 0 && post.comments.length === 0 && (
         <p className="text-gray-500">No likes or comments yet.</p>
       )}
+
+      {/* <div>
+        <LikeButton postId={post._id} />
+        <CommentButton postId={post._id} />
+      </div> */}
     </div>
   );
 }

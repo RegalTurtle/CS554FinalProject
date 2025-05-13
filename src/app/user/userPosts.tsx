@@ -6,6 +6,7 @@ import { User } from '@/src/data/users';
 import { Post } from '@/src/data/posts';
 import Image from 'next/image';
 import Link from 'next/link';
+import LikeButton from "@/src/components/likeButton";
 type PublicUser = Omit<User, 'password'>;
 export const dynamic = 'force-dynamic';
 export default function UserPosts({
@@ -62,8 +63,12 @@ export default function UserPosts({
                 />
               </div>
               <h3 className="mt-2 text-lg font-semibold text-center">
-                {post.title}
+                <Link href={`/post/${post._id}`}>
+                  {post.title}
+                </Link>
               </h3>
+
+              {/* <LikeButton postId={post._id} /> */}
             </div>
           ))}
         </div>
