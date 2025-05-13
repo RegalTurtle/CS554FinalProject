@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, ChangeEvent } from 'react';
+import { useState, ChangeEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { login } from '@/src/app/user/actions';
 
@@ -14,8 +14,21 @@ export default function LoginForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-
+  const [loading, setLoading] = useState<boolean>(true);
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      let response = await fetch(`/api/session`);
+      let data = await response.json();
+      let { session } = data;
+      if (session?.userId) {
+        router.replace('/');
+      } else {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
 
 
@@ -43,6 +56,9 @@ export default function LoginForm() {
       setIsSubmitting(false);
     }
   };
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="max-w-md mx-auto p-4">
