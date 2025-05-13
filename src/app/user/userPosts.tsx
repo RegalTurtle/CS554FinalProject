@@ -62,7 +62,9 @@ export default function UserPosts({
                 />
               </div>
               <h3 className="mt-2 text-lg font-semibold text-center">
-                {post.title}
+                <Link href={`/post/${post._id}`}>
+                  {post.title}
+                </Link>
               </h3>
             </div>
           ))}
