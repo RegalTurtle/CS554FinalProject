@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import LikeButton from "@/src/components/likeButton";
 import CommentButton from "@/src/components/commentButton";
-import { User } from '@/src/data/users';
 import { usePathname } from 'next/navigation';
 import type { SessionPayload } from '@/src/lib/session';
 
