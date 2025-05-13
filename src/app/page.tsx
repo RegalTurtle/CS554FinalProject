@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { SessionPayload } from '@/src/lib/session';
+import Image from "next/image";
 export default function Home() {
   const [session, setSession] = useState<SessionPayload | undefined | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,8 +26,13 @@ export default function Home() {
     <main className="min-h-screen bg-white text-gray-800 flex flex-col items-center justify-center px-6 py-16">
       <section className="max-w-4xl text-center">
         <h1 className="text-5xl font-extrabold mb-6">
-          Welcome to <span className="text-blue-600">The Web</span>
+          Welcome to
         </h1>
+        <div className="flex justify-center items-center w-full">
+          <Image alt="A spider web divided horizontally in the middle with the words THE WEB in blue filling the gap"
+          src="/the_web.png" />
+        </div>
+        
         <p className="text-lg mb-8 leading-relaxed">
           <strong>The Web</strong> is a social media platform designed to help
           you share life’s moments and connect with others. Create a
