@@ -25,7 +25,7 @@ export default function LikeButton(props: Props) {
 
 	return (
 	<>
-	{session?.userId && session.userId.toString() !== props.postId &&
+	{session?.userId &&
 	<button onClick={async (e: React.FormEvent) => {
 		e.preventDefault();
 
