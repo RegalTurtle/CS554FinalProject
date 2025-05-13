@@ -1,7 +1,7 @@
 'use server';
 import { createSession, deleteSession, getSession } from "@/src/lib/session";
 import { redirect } from 'next/navigation';
-import { registerUser, loginUser, addFriend, acceptRequest, getAllUsers } from '@/src/data/users';
+import { registerUser, loginUser, addFriend, acceptRequest, getAllUsers, updateUser } from '@/src/data/users';
 import { getAllPostsByUser } from "@/src/data/posts";
 import { revalidatePath } from 'next/cache';
 
@@ -9,29 +9,26 @@ interface FormState {
     message: string[] | null;
 }
 
-export async function getPosts(userId: string) {
-    let posts: any = {}
+export async function editProfile() {
+    let session = await getSession()
+    let userId
+    if (session?.userId) {
+        userId = session.userId
+    } else {
+        return {
+
+            message: ['User not signed in'],
+        };
+    }
     try {
-        posts = await getAllPostsByUser(userId)
+        await updateUser(userId)
     } catch (error: any) {
         return {
 
-            message: [error.message || 'Could not get all posts'],
-            posts: null
+            message: [error.message || 'Could not update profile'],
         };
     }
-    if (posts.allPostsFound) {
-        return {
-
-            message: [],
-            posts: posts.allPosts
-        };
-    }
-    return {
-
-        message: ['Could not get all posts'],
-        posts: null
-    };
+    redirect(`/user/${userId}`); // Navigate to new route
 }
 
 export async function createUser(

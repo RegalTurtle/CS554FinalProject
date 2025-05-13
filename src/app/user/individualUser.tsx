@@ -4,48 +4,61 @@ import { useState, useEffect } from 'react';
 import { logout } from '@/src/app/user/actions';
 import { User } from '@/src/data/users';
 import Friend from '@/src/app/user/friend';
+import Image from 'next/image';
 type PublicUser = Omit<User, 'password'>;
 export const dynamic = 'force-dynamic';
-export default function IndividualUser({ profileId, sessionUser }: { profileId: string, sessionUser: PublicUser | null }) {
+export default function IndividualUser({ profileId, sessionUser, updateFriends }: { profileId: string, sessionUser: PublicUser | null, updateFriends?: () => void }) {
     const [userData, setUserData] = useState<PublicUser | null>(null);
     const [loading, setLoading] = useState<boolean>(!userData);
     const [error, setError] = useState<string | null>(null);
 
     async function updateUserData() {
-        try {
-            setLoading(true);
+        if (updateFriends) {
+            updateFriends()
+        } else {
             const response = await fetch(`/api/user/${profileId}`);
             const data = await response.json();
             setUserData(data.user);
-            setError(null);
-        } catch (err) {
-            setError('Failed to fetch user data.');
-        } finally {
-            setLoading(false);
         }
+
     }
 
 
     useEffect(() => {
         if (!userData) {
-            updateUserData();
+            async function fetchData() {
+                try {
+                    setLoading(true);
+                    const response = await fetch(`/api/user/${profileId}`);
+                    const data = await response.json();
+                    setUserData(data.user);
+                    setError(null)
+                } catch (err) {
+                    setError('Failed to fetch user data.');
+                } finally {
+                    setLoading(false);
+                }
+            }
+            fetchData()
         }
     }, [profileId]);
 
-    if (loading) {
+    if (loading || !userData) {
         return <div>Loading...</div>;
     }
 
-    if (error || !userData) {
+    if (error) {
         return <div>{error ?? 'User not found.'}</div>;
     }
 
     return (
         <div className="flex items-center space-x-6 p-4 bg-white rounded-xl shadow-md">
-            <img
-                src={`/${userData.image}`}
+            <Image
+                src={userData.image}
                 alt="User"
-                className="w-[120px] h-[120px] object-cover rounded-full"
+                width={120}
+                height={120}
+                className="object-cover rounded-full"
             />
 
             <div className="flex-1">
