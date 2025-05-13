@@ -282,7 +282,7 @@ export const getAllPostsByUser = async (
     // If not get from Database
     const postCollection = await posts();
     const allPosts = await postCollection
-      .find({ userId: userId.toString() }) // using toString here because it's stored in the database as a string -Thys
+      .find({ userId: new ObjectId(userId) })
       .toArray();
     if (!allPosts) throw new Error('getAllPosts: All Posts Not Found.');
     allPosts.map((post: Post) => {
