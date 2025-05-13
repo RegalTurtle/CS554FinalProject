@@ -45,7 +45,7 @@ export const createPost = async (
     if (!postCollection)
       throw new Error('posts.ts: Database Collection Not Found.');
     const newPost: Omit<Post, '_id'> = {
-      userId: userId,
+      userId: new ObjectId(userId),
       title: title,
       image: image,
       caption: caption,
