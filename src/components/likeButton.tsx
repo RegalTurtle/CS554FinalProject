@@ -25,7 +25,6 @@ export default function LikeButton(props: Props) {
 
 	return (
 	<>
-	{session?.userId &&
 	<button className="border border-gray-300 rounded-md" onClick={async (e: React.FormEvent) => {
 		e.preventDefault();
 
@@ -48,7 +47,7 @@ export default function LikeButton(props: Props) {
 		}
 	}}>
 		♥ Like/Unlike
-	</button>}
+	</button>
 
 	{error &&
 	<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">

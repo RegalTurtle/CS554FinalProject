@@ -103,7 +103,6 @@ export default function SingularPostPage() {
         )}
       </div>
 
-      {/* Only appears if the user is logged in */}
       <div>
         <LikeButton postId={post._id} />
         <CommentButton postId={post._id} />

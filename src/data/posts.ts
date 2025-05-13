@@ -14,12 +14,12 @@ export interface Post {
   title: string;
   image: Buffer | string;
   caption: string;
-  likedUsers: (ObjectId | string)[];
+  likedUsers: (ObjectId | string | null)[];
   comments: Comment[];
 }
 
 export interface Comment {
-  userId: ObjectId | string;
+  userId: ObjectId | string | null;
   text: string;
 }
 
@@ -298,8 +298,8 @@ export const getAllPostsByUser = async (
 };
 
 export const likePost = async (
-  userId: ObjectId | string,
-  postId: ObjectId | string
+  postId: ObjectId | string,
+  userId?: ObjectId | string
 ): Promise<{
   postUpdated: boolean;
   updatedPost?: Post;
@@ -311,13 +311,19 @@ export const likePost = async (
     const post: Post | undefined = postObj.post;
     if (post === undefined) throw `no post with ID ${postId}`;
 
-    const userObjId: ObjectId = new ObjectId(userId);
-    let newLikedUsers: (ObjectId | string)[] = post.likedUsers;
+    let userObjId: ObjectId | undefined = undefined;
+    if (userId)
+      userObjId = new ObjectId(userId);
+    let newLikedUsers: (ObjectId | string | null)[] = post.likedUsers;
 
-    if (newLikedUsers.includes(userObjId)) {
-      newLikedUsers = newLikedUsers.filter((elem) => elem !== userObjId);
+    if (userObjId) {
+      if (newLikedUsers.includes(userObjId)) {
+        newLikedUsers = newLikedUsers.filter((elem) => elem !== userObjId);
+      } else {
+        newLikedUsers.push(userObjId);
+      }
     } else {
-      newLikedUsers.push(userObjId);
+      newLikedUsers.push(null);
     }
 
     const postCollection = await posts();
@@ -354,9 +360,9 @@ export const likePost = async (
 };
 
 export const createComment = async (
-  userId: ObjectId | string,
   postId: ObjectId | string,
-  text: string
+  text: string,
+  userId?: ObjectId | string
 ): Promise<{
   postUpdated: boolean;
   updatedPost?: Post;
@@ -370,10 +376,18 @@ export const createComment = async (
     const post: Post | undefined = postObj.post;
     if (post === undefined) throw `no post with ID ${postId}`;
 
-    const comment: Comment = {
-      userId: new ObjectId(userId),
-      text: text,
-    };
+    let comment: Comment;
+    if (userId) {
+      comment = {
+        userId: new ObjectId(userId),
+        text: text,
+      };
+    } else {
+      comment = {
+        userId: null,
+        text: text,
+      };
+    }
     let newComments = post.comments;
     newComments.push(comment);
 
@@ -394,7 +408,7 @@ export const createComment = async (
       _id: new ObjectId(postId),
     });
     await client.del(`post${postId}`);
-    await client.del(`allPosts}`);
+    await client.del(`allPosts`);
     await client.del(`allPosts-${updatedPost.userId.toString()}`);
     await client.set(`post${postId}`, JSON.stringify(updatedPost));
     await client.expire(`post${postId}`, 3600);
