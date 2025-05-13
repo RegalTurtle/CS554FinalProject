@@ -94,7 +94,7 @@ export default function SingularPostPage() {
           <ul className="pl-5 list-disc space-y-1 text-gray-700">
             {post.comments.map((comment, i) => (
               <li key={i}>
-                <strong>{comment.userId || 'Anonymous'}:</strong> {comment.text}
+                <strong>{comment.user.name || 'Anonymous'}:</strong> {comment.text}
               </li>
             ))}
           </ul>
