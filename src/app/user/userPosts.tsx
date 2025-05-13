@@ -1,14 +1,14 @@
 'use client';
-import { use } from 'react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { User } from '@/src/data/users';
 import { Post } from '@/src/data/posts';
 import Image from 'next/image';
 import Link from 'next/link';
-import LikeButton from "@/src/components/likeButton";
+import LikeButton from '@/src/components/likeButton';
 
 type PublicUser = Omit<User, 'password'>;
 export const dynamic = 'force-dynamic';
+
 export default function UserPosts({
   profileUserId,
 }: {
@@ -25,7 +25,6 @@ export default function UserPosts({
         const response = await fetch(`/api/user/posts/${profileUserId}`);
         const data = await response.json();
         if (data.posts) {
-
           setPosts(data.posts);
           setMessage(null);
         } else {
@@ -51,23 +50,27 @@ export default function UserPosts({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {posts.map((post, idx) => (
-            <div key={idx} className="border rounded shadow p-2">
-              <div className="relative w-full h-48">
-                <Image
-                  src={`data:image/jpeg;base64,${post.image}`}
-                  alt={post.title}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded"
-                  unoptimized // required for base64
-                />
-              </div>
-              <h3 className="mt-2 text-lg font-semibold text-center">
-                <Link href={`/post/${post._id}`}>
+            <Link
+              key={idx}
+              href={`/post/${post._id}`}
+              className="block border rounded shadow hover:shadow-md transition-shadow duration-200"
+            >
+              <div className="p-2">
+                <div className="relative w-full h-48 rounded overflow-hidden">
+                  <Image
+                    src={`data:image/jpeg;base64,${post.image}`}
+                    alt={post.title}
+                    layout="fill"
+                    objectFit="cover"
+                    className="rounded"
+                    unoptimized
+                  />
+                </div>
+                <h3 className="mt-2 text-lg font-semibold text-center text-gray-800">
                   {post.title}
-                </Link>
-              </h3>
-            </div>
+                </h3>
+              </div>
+            </Link>
           ))}
         </div>
       )}
