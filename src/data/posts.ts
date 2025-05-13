@@ -37,14 +37,14 @@ export const createPost = async (
 
     // Check if User exists
 
-    const user = await userCollection.findOne({ _id: userId });
+    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
     if (!user) throw new Error('User not found.');
 
     // Add to Posts Collection
     if (!postCollection)
       throw new Error('posts.ts: Database Collection Not Found.');
     const newPost: Omit<Post, '_id'> = {
-      userId: userId,
+      userId: new ObjectId(userId),
       title: title,
       image: image,
       caption: caption,
@@ -66,7 +66,7 @@ export const createPost = async (
 
     const postId = insertPost.insertedId;
     const updateUser = await userCollection.updateOne(
-      { _id: userId },
+      { _id: new ObjectId(userId) },
       {
         $push: { posts: postId }, // Append postId to the posts array
       }
@@ -329,7 +329,7 @@ export const likePost = async (
     }
 
     const postCollection = await posts();
-    const updatedPost: Post | undefined = await postCollection.updateOne(
+    const updatedPost: Post | undefined = await postCollection.findOneAndUpdate( // findOneAndUpdate here so that we actually get the object back -Thys
       {
         _id: new ObjectId(postId),
       },
@@ -390,7 +390,7 @@ export const createComment = async (
     newComments.push(comment);
 
     const postCollection = await posts();
-    const updatedPost: Post | undefined = await postCollection.updateOne(
+    const updatedPost: Post | undefined = await postCollection.findOneAndUpdate( // findOneAndUpdate here so that we actually get the object back -Thys
       {
         _id: new ObjectId(postId),
       },
