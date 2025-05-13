@@ -306,7 +306,7 @@ export const likePost = async (
 }> => {
   try {
     if (typeof userId === 'string') userId = userId.trim();
-    if (userId.toString === postId.toString)
+    if (userId.toString() === postId.toString())
       throw "you can't like your own post";
 
     const postObj = await getPostById(postId);
