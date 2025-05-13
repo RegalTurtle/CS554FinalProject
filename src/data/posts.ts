@@ -35,7 +35,7 @@ export const createPost = async (
 
     // Check if User exists
 
-    const user = await userCollection.findOne({ _id: userId });
+    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
     if (!user) throw new Error('User not found.');
 
     // Add to Posts Collection
@@ -64,7 +64,7 @@ export const createPost = async (
 
     const postId = insertPost.insertedId;
     const updateUser = await userCollection.updateOne(
-      { _id: userId },
+      { _id: new ObjectId(userId) },
       {
         $push: { posts: postId }, // Append postId to the posts array
       }
@@ -279,7 +279,7 @@ export const getAllPostsByUser = async (
     // If not get from Database
     const postCollection = await posts();
     const allPosts = await postCollection
-      .find({ userId: new ObjectId(userId) })
+      .find({ userId: userId.toString() }) // using toString here because it's stored in the database as a string -Thys
       .toArray();
     if (!allPosts) throw new Error('getAllPosts: All Posts Not Found.');
     allPosts.map((post: Post) => {
@@ -339,7 +339,7 @@ export const likePost = async (
     }
 
     const postCollection = await posts();
-    const updatedPost: Post | undefined = await postCollection.updateOne(
+    const updatedPost: Post | undefined = await postCollection.findOneAndUpdate( // findOneAndUpdate here so that we actually get the object back -Thys
       {
         _id: new ObjectId(postId),
       },
@@ -396,7 +396,7 @@ export const createComment = async (
     newComments.push(comment);
 
     const postCollection = await posts();
-    const updatedPost: Post | undefined = await postCollection.updateOne(
+    const updatedPost: Post | undefined = await postCollection.findOneAndUpdate( // findOneAndUpdate here so that we actually get the object back -Thys
       {
         _id: new ObjectId(postId),
       },
