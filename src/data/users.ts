@@ -308,54 +308,45 @@ export const acceptRequest = async (userId: string, friendId: string) => {
 };
 
 export const updateUser = async (
-  id: ObjectId | string,
-  title?: string,
-  caption?: string
+  id: ObjectId | string, data:
+    {
+      name: string,
+      bio: string,
+      image?: string
+    }
 ) => {
   try {
-    if (title) title = title.trim();
-    if (caption) caption = caption.trim();
+    console.log(data)
+    console.log(id)
+    let name = data.name
+    let bio = data.bio
+    if (name) name = name.trim();
+    if (bio) bio = bio.trim();
 
-    const updateData: { title?: string; caption?: string } = {};
-    if (title) updateData.title = title;
-    if (caption) updateData.caption = caption;
+    const updateData: { name?: string; bio?: string, image?: string } = { bio: "" };
+    if (name) updateData.name = name;
+    if (bio) updateData.bio = bio;
 
-    if (Object.keys(updateData).length === 0) {
-      throw new Error('No valid fields provided for update.');
+    if (data.image) {
+      updateData.image = data.image
     }
 
-    const postCollection = await posts();
+    const userCollection = await users();
 
-    const result = await postCollection.updateOne(
+    const result = await userCollection.updateOne(
       { _id: new ObjectId(id) },
       { $set: updateData }
     );
-
-    if (result.modifiedCount === 0) {
+    console.log(result)
+    if (!result.acknowledged) {
       throw new Error(
-        'No post updated. Either the post does not exist or the data is the same.'
+        'Unable to Update'
       );
     }
 
-    const updatedPost = await postCollection.findOne({ _id: new ObjectId(id) });
-    if (!updatedPost) {
-      throw new Error('updatePost: Could Not Update Post.');
-    }
-
-    // Since it is Mutation, we delete getAllPosts, postById (all queries)
-
-    //await client.del(`post${id}`);
-    //await client.del(`allPosts`);
-    //await client.del(`allPosts-${updatedPost.userId.toString()}`);
-    // Add the updated Post into cache.
-
-    //await client.set(`post${id}`, JSON.stringify(updatedPost));
-    //await client.expire(`post${id}`, 3600);
-    console.log(`updatePost: Post Updated into Cache!`);
-
-    return { postUpdated: true, updatedPost };
   } catch (e) {
-    console.error(e);
-    return { postUpdated: false };
+    throw new Error(
+      'Unable to Update'
+    );
   }
 };

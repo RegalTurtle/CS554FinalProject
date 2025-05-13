@@ -63,7 +63,6 @@ export default function UserPosts({
                     layout="fill"
                     objectFit="cover"
                     className="rounded"
-                    unoptimized
                   />
                 </div>
                 <h3 className="mt-2 text-lg font-semibold text-center text-gray-800">
