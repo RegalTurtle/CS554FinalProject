@@ -22,7 +22,6 @@ export default function searchUser() {
     let response = await fetch(`/api/user`);
     let data = await response.json();
     let { users } = data;
-    console.log(users)
     setUsers(users)
   }
 
