@@ -16,15 +16,14 @@ interface Post {
   comments: any[];
 }
 
-type PublicUser = Omit<User, 'password'>;
-
 export default function SingularPostPage() {
   const { id } = useParams();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [sessionUser, setSessionUser] = useState<PublicUser | null>(null);
+  const pathname = usePathname();
+  const [session, setSession] = useState<SessionPayload | undefined | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -44,6 +43,17 @@ export default function SingularPostPage() {
 
     fetchPost();
   }, [id]);
+
+  useEffect(() => {
+    async function fetchData() {
+        const response = await fetch(`/api/session`);
+        const data = await response.json();
+        let { session } = data;
+        setSession(session);
+    }
+
+    fetchData();
+    }, [pathname]);
 
   if (loading) return <p className="p-4">Loading...</p>;
   if (error) return <p className="p-4 text-red-600">Error: {error}</p>;
