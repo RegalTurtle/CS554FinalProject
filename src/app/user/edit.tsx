@@ -10,7 +10,7 @@ import Link from 'next/link';
 type PublicUser = Omit<User, 'password'>;
 export const dynamic = 'force-dynamic';
 const initialState = {
-  message: null
+  message: [] as any[]
 };
 export default function UserEditForm({ sessionUser }: { sessionUser: PublicUser | null }) {
   const [state, formAction] = useActionState(editProfile, initialState);

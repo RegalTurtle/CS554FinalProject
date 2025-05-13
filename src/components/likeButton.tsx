@@ -26,7 +26,7 @@ export default function LikeButton(props: Props) {
 	return (
 	<>
 	{session?.userId &&
-	<button onClick={async (e: React.FormEvent) => {
+	<button className="border border-gray-300 rounded-md" onClick={async (e: React.FormEvent) => {
 		e.preventDefault();
 
 		const data = {postId: props.postId};
