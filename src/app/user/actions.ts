@@ -9,26 +9,25 @@ interface FormState {
     message: string[] | null;
 }
 
-export async function editProfile() {
+export async function editProfile(data: any) {
     let session = await getSession()
-    let userId: any = undefined;
+    let userId: string
     if (session?.userId) {
-        userId = session.userId
+        userId = session.userId.toString()
     } else {
         return {
 
-            message: ['User not signed in'],
+            message: 'User not signed in',
         };
     }
     try {
-        await updateUser(userId)
+        await updateUser(userId, data)
     } catch (error: any) {
         return {
 
-            message: [error.message || 'Could not update profile'],
+            message: error.message || 'Could not update profile',
         };
     }
-    redirect(`/user/${userId}`); // Navigate to new route
 }
 
 export async function createUser(
