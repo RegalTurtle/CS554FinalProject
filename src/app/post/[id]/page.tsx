@@ -65,7 +65,7 @@ export default function SingularPostPage() {
       <p className="text-gray-700 whitespace-pre-line mb-4">{post.caption}</p>
 
       {/* Liked Users */}
-      {post.likedUsers.length > 0 && (
+      {post.likedUsers && post.likedUsers.length > 0 && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold">Liked by:</h3>
           <ul className="list-disc pl-5">
@@ -77,7 +77,7 @@ export default function SingularPostPage() {
       )}
 
       {/* Comments */}
-      {post.comments.length > 0 && (
+      {post.comments && post.comments.length > 0 && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold">Comments:</h3>
           <ul className="list-disc pl-5">
@@ -91,7 +91,7 @@ export default function SingularPostPage() {
       )}
 
       {/* Fallback if no liked users or comments */}
-      {post.likedUsers.length === 0 && post.comments.length === 0 && (
+      {post.likedUsers && post.likedUsers.length === 0 && post.comments && post.comments.length === 0 && (
         <p className="text-gray-500">No likes or comments yet.</p>
       )}
 

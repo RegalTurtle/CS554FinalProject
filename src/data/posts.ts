@@ -106,11 +106,10 @@ export const getPostById = async (
     // If not get from Database
     const postCollection = await posts();
     const post = await postCollection.findOne({ _id: new ObjectId(id) });
-
     if (!post) throw new Error('getPostByID: No Post Found.');
+    post.image = post.image.toString();
 
     // Cache
-
     await client.set(`post${id}`, JSON.stringify(post));
     await client.expire(`post${id}`, 3600);
     console.log('getPostById: Post Returned from Cache.');
@@ -139,6 +138,9 @@ export const getAllPosts = async (): Promise<{
     const postCollection = await posts();
     const allPosts = await postCollection.find({}).toArray();
     if (!allPosts) throw new Error('getAllPosts: All Posts Not Found.');
+    allPosts.map((post: Post) => {
+      post.image = post.image.toString();
+    });
 
     // Cache
 
@@ -273,8 +275,8 @@ export const getAllPostsByUser = async (
     allPosts.map((post: Post) => {
       post.image = post.image.toString();
     });
-    // Cache
 
+    // Cache
     await client.set(`allPosts-${userId.toString()}`, JSON.stringify(allPosts));
     await client.expire(`allPosts-${userId.toString()}`, 3600);
     console.log(`getAllPosts: All Posts Returned from Cache.`);
