@@ -14,6 +14,22 @@ export default function AddUserForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      let response = await fetch(`/api/session`);
+      let data = await response.json();
+      let { session } = data;
+      if (session?.userId) {
+        router.replace('/');
+      }
+      else {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement>
@@ -41,6 +57,9 @@ export default function AddUserForm() {
       setIsSubmitting(false);
     }
   };
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="max-w-md mx-auto p-4">

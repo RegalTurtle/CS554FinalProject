@@ -37,7 +37,7 @@ export default function UpdateProfile() {
         setFormData({ name: data.user.name, bio: data.user.bio, image: null })
         setPreviewImage(data.user.image)
       } else {
-        setSessionUser(null);
+        router.replace('/')
       }
       setLoading(false);
     }
