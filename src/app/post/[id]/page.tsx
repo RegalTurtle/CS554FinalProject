@@ -10,7 +10,7 @@ interface Post {
   _id: string;
   userId: string;
   title: string;
-  image: string; // base64-encoded string directly
+  image: string;
   caption: string;
   likedUsers: any[];
   comments: any[];
@@ -26,11 +26,9 @@ export default function SingularPostPage() {
     const fetchPost = async () => {
       try {
         const response = await fetch(`/api/post/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch post');
-        }
+        if (!response.ok) throw new Error('Failed to fetch post');
         const data = await response.json();
-        setPost(data.post);
+        setPost(data.post.post);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -41,28 +39,37 @@ export default function SingularPostPage() {
     fetchPost();
   }, [id]);
 
-  if (loading) return <p className="p-4">Loading...</p>;
-  if (error) return <p className="p-4 text-red-600">Error: {error}</p>;
-  if (!post) return <p className="p-4">Post not found.</p>;
+  if (loading)
+    return <p className="p-6 text-center text-gray-600">Loading...</p>;
+  if (error)
+    return <p className="p-6 text-center text-red-600">Error: {error}</p>;
+  if (!post)
+    return <p className="p-6 text-center text-gray-600">Post not found.</p>;
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
+    <div className="max-w-2xl mx-auto p-6 space-y-6">
+      {/* Title */}
+      <h1 className="text-3xl font-extrabold text-gray-900">{post.title}</h1>
 
-      {/* Image Handling */}
-      <div className="relative mb-4 w-full h-96">
+      {/* Image */}
+      <div className="relative w-full aspect-[4/3] rounded-md overflow-hidden shadow-md">
         <Image
           src={`data:image/jpeg;base64,${post.image}`} // Base64-encoded string
           alt={post.title || 'Post image'}
           layout="fill"
           objectFit="cover"
           className="rounded-md"
-          unoptimized // required for base64-encoded images
+          unoptimized
         />
       </div>
 
       {/* Caption */}
-      <p className="text-gray-700 whitespace-pre-line mb-4">{post.caption}</p>
+      <div>
+        <h2 className="text-xl font-semibold text-gray-800 mb-1">Caption:</h2>
+        <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+          {post.caption}
+        </p>
+      </div>
 
       {/* Liked Users */}
       {post.likedUsers && post.likedUsers.length > 0 && (
@@ -73,8 +80,10 @@ export default function SingularPostPage() {
               <li key={index}>{user.name || 'Anonymous'}</li>
             ))}
           </ul>
-        </div>
-      )}
+        ) : (
+          <p className="text-gray-500">No likes yet.</p>
+        )}
+      </div>
 
       {/* Comments */}
       {post.comments && post.comments.length > 0 && (
