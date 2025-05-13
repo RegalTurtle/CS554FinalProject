@@ -68,8 +68,6 @@ export default function UserPosts({
                   {post.title}
                 </Link>
               </h3>
-
-              {/* <LikeButton postId={post._id} /> */}
             </div>
           ))}
         </div>
