@@ -89,6 +89,11 @@ export const createPost = async (
   }
 };
 
+async function clearRedis() {
+  await client.flushAll();
+  console.log('Redis Cleared');
+}
+
 export const getPostById = async (
   id: ObjectId | string
 ): Promise<{ postFound: boolean; post?: Post }> => {
@@ -96,7 +101,7 @@ export const getPostById = async (
     if (typeof id === 'string') id = id.trim();
 
     // Check if it is in Cache
-
+    await clearRedis();
     const cache = await client.get(`post${id}`);
     if (cache) {
       console.log('getPostById: Post is Cached.');
@@ -109,12 +114,17 @@ export const getPostById = async (
     if (!post) throw new Error('getPostByID: No Post Found.');
     post.image = post.image.toString();
 
+    const processedPost = {
+      ...post,
+      image: post.image.toString(),
+    };
+
     // Cache
     await client.set(`post${id}`, JSON.stringify(post));
     await client.expire(`post${id}`, 3600);
-    console.log('getPostById: Post Returned from Cache.');
+    console.log('getPostById: Post cached with base64 image.');
 
-    return { postFound: true, post };
+    return { postFound: true, post: processedPost };
   } catch (e) {
     console.error(e);
     return { postFound: false };
@@ -259,13 +269,13 @@ export const getAllPostsByUser = async (
   try {
     if (typeof userId === 'string') userId = userId.trim();
     // Check if it is in Cache
-
+    await clearRedis();
     const cache = await client.get(`allPosts-${userId.toString()}`);
     if (cache) {
       console.log('getAllPosts: All Posts is Cached');
       return JSON.parse(cache);
     }
-    console.log(userId);
+
     // If not get from Database
     const postCollection = await posts();
     const allPosts = await postCollection
@@ -279,7 +289,7 @@ export const getAllPostsByUser = async (
     // Cache
     await client.set(`allPosts-${userId.toString()}`, JSON.stringify(allPosts));
     await client.expire(`allPosts-${userId.toString()}`, 3600);
-    console.log(`getAllPosts: All Posts Returned from Cache.`);
+    console.log(`getAllPosts: All Posts Returned from DB.`);
 
     return allPosts;
   } catch (e) {

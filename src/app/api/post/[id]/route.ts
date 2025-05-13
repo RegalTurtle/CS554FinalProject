@@ -1,4 +1,3 @@
-
 import { getPostById } from '@/src/data/posts';
 import { NextResponse } from 'next/server';
 import path from 'path';
@@ -18,6 +17,6 @@ export async function GET(
   } catch (error: any) {
     return NextResponse.json({ error }, { status: 500 });
   } finally {
-    return NextResponse.json({ post }, { status: 200 });
+    return NextResponse.json({ post: post }, { status: 200 });
   }
 }

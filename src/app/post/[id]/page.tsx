@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import LikeButton from "@/src/components/likeButton";
-import CommentButton from "@/src/components/commentButton";
+import LikeButton from '@/src/components/likeButton';
+import CommentButton from '@/src/components/commentButton';
 
 interface Post {
   _id: string;
   userId: string;
   title: string;
-  image: string; // base64-encoded string directly
+  image: string;
   caption: string;
   likedUsers: any[];
   comments: any[];
@@ -26,11 +26,9 @@ export default function SingularPostPage() {
     const fetchPost = async () => {
       try {
         const response = await fetch(`/api/post/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch post');
-        }
+        if (!response.ok) throw new Error('Failed to fetch post');
         const data = await response.json();
-        setPost(data.post);
+        setPost(data.post.post);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -41,64 +39,68 @@ export default function SingularPostPage() {
     fetchPost();
   }, [id]);
 
-  if (loading) return <p className="p-4">Loading...</p>;
-  if (error) return <p className="p-4 text-red-600">Error: {error}</p>;
-  if (!post) return <p className="p-4">Post not found.</p>;
+  if (loading)
+    return <p className="p-6 text-center text-gray-600">Loading...</p>;
+  if (error)
+    return <p className="p-6 text-center text-red-600">Error: {error}</p>;
+  if (!post)
+    return <p className="p-6 text-center text-gray-600">Post not found.</p>;
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
+    <div className="max-w-2xl mx-auto p-6 space-y-6">
+      {/* Title */}
+      <h1 className="text-3xl font-extrabold text-gray-900">{post.title}</h1>
 
-      {/* Image Handling */}
-      <div className="relative mb-4 w-full h-96">
+      {/* Image */}
+      <div className="relative w-full aspect-[4/3] rounded-md overflow-hidden shadow-md">
         <Image
-          src={`data:image/jpeg;base64,${post.image}`} // Base64-encoded string
+          src={`data:image/jpeg;base64,${post.image}`}
           alt={post.title || 'Post image'}
           layout="fill"
           objectFit="cover"
           className="rounded-md"
-          unoptimized // required for base64-encoded images
+          unoptimized
         />
       </div>
 
       {/* Caption */}
-      <p className="text-gray-700 whitespace-pre-line mb-4">{post.caption}</p>
+      <div>
+        <h2 className="text-xl font-semibold text-gray-800 mb-1">Caption:</h2>
+        <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+          {post.caption}
+        </p>
+      </div>
 
-      {/* Liked Users */}
-      {post.likedUsers && post.likedUsers.length > 0 && (
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold">Liked by:</h3>
-          <ul className="list-disc pl-5">
-            {post.likedUsers.map((user, index) => (
-              <li key={index}>{user.name || 'Anonymous'}</li>
+      {/* Likes */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">Liked by:</h3>
+        {post.likedUsers?.length > 0 ? (
+          <ul className="pl-5 list-disc space-y-1 text-gray-700">
+            {post.likedUsers.map((user, i) => (
+              <li key={i} className="hover:text-blue-600 transition-colors">
+                {user.name || 'Anonymous'}
+              </li>
             ))}
           </ul>
-        </div>
-      )}
+        ) : (
+          <p className="text-gray-500">No likes yet.</p>
+        )}
+      </div>
 
       {/* Comments */}
-      {post.comments && post.comments.length > 0 && (
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold">Comments:</h3>
-          <ul className="list-disc pl-5">
-            {post.comments.map((comment, index) => (
-              <li key={index}>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">Comments:</h3>
+        {post.comments?.length > 0 ? (
+          <ul className="pl-5 list-disc space-y-1 text-gray-700">
+            {post.comments.map((comment, i) => (
+              <li key={i}>
                 <strong>{comment.userId || 'Anonymous'}:</strong> {comment.text}
               </li>
             ))}
           </ul>
-        </div>
-      )}
-
-      {/* Fallback if no liked users or comments */}
-      {post.likedUsers && post.likedUsers.length === 0 && post.comments && post.comments.length === 0 && (
-        <p className="text-gray-500">No likes or comments yet.</p>
-      )}
-
-      {/* Only appears if the user is logged in */}
-      <div>
-        <LikeButton postId={post._id} />
-        <CommentButton postId={post._id} />
+        ) : (
+          <p className="text-gray-500">No comments yet.</p>
+        )}
       </div>
     </div>
   );
