@@ -30,7 +30,7 @@ export default function Home() {
         </h1> */}
         <div className="flex justify-center items-center w-full">
           <Image alt="A spider web divided horizontally in the middle with the words THE WEB in blue filling the gap"
-          src="/the_web.png" width={400} height={300} />
+          src="/the_web.png" width={400} height={400} />
         </div>
         
         <p className="text-lg mb-8 leading-relaxed">
