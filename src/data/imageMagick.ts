@@ -101,4 +101,26 @@ const getDimensions = (
   });
 }
 
-export default { grayScaleImage, cropImage };
+export const blur = (
+  srcPath: string,
+  dstPath: string,
+  blurValue: number,
+): Promise<void> => {
+  if (typeof blurValue !== 'number') throw new Error('blurValue must be a number');
+  if (blurValue < 1) throw new Error('blurValue must be 1 or greater');
+
+  return new Promise((resolve, reject) => {
+    im.convert([srcPath, '-blur', `0x${blurValue}`, dstPath],
+      (err: Error | null) => {
+        if (err) {
+          console.error('IM blur failed:', err);
+          return reject(err);
+        }
+        console.log(`IM blur successful`);
+        resolve();
+      }
+    )
+  })
+}
+
+export default { grayScaleImage, cropImage, blur };
