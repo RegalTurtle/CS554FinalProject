@@ -8,6 +8,8 @@ import { getUser } from "./users";
 const client = redis.createClient();
 await client.connect();
 
+type PublicUser = Omit<User, "password">;
+
 export interface Post {
   _id: ObjectId | string;
   userId: ObjectId | string;
@@ -15,12 +17,12 @@ export interface Post {
   image: Buffer | string;
   imageMimeType?: string
   caption: string;
-  likedUsers: (ObjectId | string | null)[];
+  likedUsers: (PublicUser | null)[];
   comments: Comment[];
 }
 
 export interface Comment {
-  userId: ObjectId | string | null;
+  user: PublicUser | null;
   text: string;
 }
 
@@ -330,16 +332,16 @@ export const likePost = async (
     const post: Post | undefined = postObj.post;
     if (post === undefined) throw `no post with ID ${postId}`;
 
-    let userObjId: ObjectId | undefined = undefined;
+    let user: PublicUser | undefined = undefined;
     if (userId)
-      userObjId = new ObjectId(userId);
-    let newLikedUsers: (ObjectId | string | null)[] = post.likedUsers;
+      user = await getUser(userId.toString());
+    let newLikedUsers: (PublicUser | null)[] = post.likedUsers;
 
-    if (userObjId) {
-      if (newLikedUsers.includes(userObjId)) {
-        newLikedUsers = newLikedUsers.filter((elem) => elem !== userObjId);
+    if (user) {
+      if (newLikedUsers.find((elem) => elem !== null && elem._id.toString() === user._id.toString()) !== undefined) {
+        newLikedUsers = newLikedUsers.filter((elem) => elem === null || elem._id.toString() !== user._id.toString());
       } else {
-        newLikedUsers.push(userObjId);
+        newLikedUsers.push(user);
       }
     } else {
       newLikedUsers.push(null);
@@ -394,18 +396,14 @@ export const createComment = async (
     const post: Post | undefined = postObj.post;
     if (post === undefined) throw `no post with ID ${postId}`;
 
-    let comment: Comment;
-    if (userId) {
-      comment = {
-        userId: new ObjectId(userId),
-        text: text,
-      };
-    } else {
-      comment = {
-        userId: null,
-        text: text,
-      };
-    }
+    let user: PublicUser | null = null;
+    if (userId)
+      user = await getUser(userId.toString());
+
+    const comment: Comment = {
+      user: user,
+      text: text
+    };
     let newComments = post.comments;
     newComments.push(comment);
 
