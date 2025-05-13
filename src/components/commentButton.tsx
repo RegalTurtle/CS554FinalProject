@@ -28,13 +28,16 @@ export default function CommentButton(props: Props) {
 	<>
 	{session?.userId &&
 	<div>
-		<button onClick={() => setBox(!box)}>Comment</button>
+		<button className="border border-gray-300 rounded-md"
+		onClick={() => setBox(!box)}>Comment</button>
 
 		{box &&
 		<form>
-			<input id="commentBox" type="text" name="commentBox" />
+			<input className="border border-gray-300 rounded-md"
+			id="commentBox" type="text" name="commentBox" />
 
-			<button type="submit" onClick={async () => {
+			<button className="border border-gray-300 rounded-md"
+			type="submit" onClick={async () => {
 				const text: string | null =
 				(document.getElementById("commentBox") as HTMLInputElement).value;
 				
