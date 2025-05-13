@@ -11,7 +11,7 @@ interface FormState {
 
 export async function editProfile() {
     let session = await getSession()
-    let userId
+    let userId: any = undefined;
     if (session?.userId) {
         userId = session.userId
     } else {
