@@ -37,7 +37,6 @@ export default function NewPostPage() {
       let { session } = data;
       if (session?.userId) {
         setLoading(false);
-        router.replace('/');
       } else {
         router.replace('/');
       }
