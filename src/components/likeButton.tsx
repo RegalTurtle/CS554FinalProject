@@ -13,8 +13,8 @@ interface Post {
 }
 
 interface Props {
-	postId: string
-  setPost: Dispatch<SetStateAction<Post | null>>
+	postId: string,
+	setPost: Dispatch<SetStateAction<Post | null>>
 }
 
 export default function LikeButton(props: Props) {
@@ -38,7 +38,7 @@ export default function LikeButton(props: Props) {
 				throw new Error(errorData.message);
 			}
 
-      props.setPost((await response.json()).post);
+			props.setPost((await response.json()).post);
 		} catch (e) {
 			console.error("Error (un)liking post: ", e);
 			setError(e instanceof Error ? e.message : "An unknown error occurred");

@@ -1,9 +1,20 @@
 "use client";
 
-import {useState} from "react";
+import {Dispatch, SetStateAction, useState} from "react";
+
+interface Post {
+	_id: string;
+	userId: string;
+	title: string;
+	image: string;
+	caption: string;
+	likedUsers: any[];
+	comments: any[];
+}
 
 interface Props {
-	postId: string
+	postId: string,
+	setPost: Dispatch<SetStateAction<Post | null>>
 }
 
 export default function CommentButton(props: Props) {
@@ -30,7 +41,7 @@ export default function CommentButton(props: Props) {
 				
 				try {
 					if (!text || text.trim().length === 0)
-						throw "comment cannot be empty";
+						throw new Error("comment cannot be empty");
 
 					const data = {
 						postId: props.postId,
@@ -43,8 +54,10 @@ export default function CommentButton(props: Props) {
 					});
 					if (!response.ok) {
 						const errorData = await response.json();
-						throw errorData.message;
+						throw new Error(errorData.message);
 					}
+
+					props.setPost((await response.json()).post);
 
 				} catch (e) {
 					console.error("Error creating comment: ", e);

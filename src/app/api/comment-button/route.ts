@@ -23,8 +23,8 @@ export async function PATCH(request: Request) {
 		}
 
 		return NextResponse.json(
-			{message: "Comment created successfully"},
-			{status: 204}
+			{message: "Comment created successfully", post: result.updatedPost},
+			{status: 200}
 		);
 
 	} catch (e) {

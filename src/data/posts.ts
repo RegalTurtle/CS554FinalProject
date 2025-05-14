@@ -407,6 +407,9 @@ export const createComment = async (
     const newPost: Post = await postCollection.findOne({
       _id: new ObjectId(postId),
     });
+    newPost.image = newPost.image.toString();
+    updatedPost.image = updatedPost.image.toString();
+    
     await client.del(`post${postId}`);
     await client.del(`allPosts`);
     await client.del(`allPosts-${updatedPost.userId.toString()}`);
