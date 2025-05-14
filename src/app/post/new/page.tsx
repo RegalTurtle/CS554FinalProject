@@ -118,7 +118,11 @@ export default function NewPostPage() {
         throw new Error(errorData.message || 'Failed to create post');
       }
 
-      router.push('/');
+      const data = await response.json();
+      if (data.post) {
+        router.push(`/post/${data.post._id.toString()}`);
+      }
+
     } catch (err) {
       // console.error('Error creating post:', err);
       setError(
