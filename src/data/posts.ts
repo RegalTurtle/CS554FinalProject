@@ -15,6 +15,7 @@ export interface Post {
   userId: ObjectId | string;
   title: string;
   image: Buffer | string;
+  imageMimeType?: string
   caption: string;
   likedUsers: PublicUser[];
   comments: Comment[];
