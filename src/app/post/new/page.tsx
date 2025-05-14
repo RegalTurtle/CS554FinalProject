@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, ChangeEvent } from 'react';
+import { useState, useRef, ChangeEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Modal from '@/src/components/Modal';
 
@@ -26,6 +26,28 @@ export default function NewPostPage() {
 
   // State for blurring
   const [blurValue, setBlurValue] = useState(1);
+
+
+  const [loading, setLoading] = useState<boolean>(true);
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      let response = await fetch(`/api/session`);
+      let data = await response.json();
+      let { session } = data;
+      if (session?.userId) {
+        setLoading(false);
+        router.replace('/');
+      } else {
+        router.replace('/');
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -269,9 +291,9 @@ export default function NewPostPage() {
       <Modal show={showModal} onClose={() => setShowModal(false)}>
         {/* The error box */}
         {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
         )}
 
         {/* The preview image */}
@@ -289,7 +311,7 @@ export default function NewPostPage() {
           {/* The grayscale button */}
           <button
             type="button"
-            onClick={() => {handleEditImage(`grayscale`)}}
+            onClick={() => { handleEditImage(`grayscale`) }}
             disabled={isEditing}
             className="mt-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -300,7 +322,7 @@ export default function NewPostPage() {
           <div className="flex flex-col my-2 border rounded p-2">
             <div className='flex'>
               <label className='p-2' htmlFor="width-percent">Width %</label>
-              <input 
+              <input
                 id="width-percent"
                 type="number"
                 placeholder="100"
@@ -312,7 +334,7 @@ export default function NewPostPage() {
               />
               <p className="inline mr-2 py-2">x</p>
               <label className='p-2' htmlFor="height-percent">Height %</label>
-              <input 
+              <input
                 id="height-percent"
                 type="number"
                 placeholder="100"
@@ -326,7 +348,7 @@ export default function NewPostPage() {
 
             <div className='flex'>
               <label className='p-2' htmlFor="horizontal-offset-percent">Horizontal Offset %</label>
-              <input 
+              <input
                 id="horizontal-offset-percent"
                 type="number"
                 placeholder="0"
@@ -338,7 +360,7 @@ export default function NewPostPage() {
               />
               <p className="inline mr-2 py-2">x</p>
               <label className='p-2' htmlFor="vertical-offset-percent">Vertical Offset %</label>
-              <input 
+              <input
                 id="vertical-offset-percent"
                 type="number"
                 placeholder="0"
@@ -352,7 +374,7 @@ export default function NewPostPage() {
 
             <button
               type="button"
-              onClick={() => {handleEditImage(`crop`)}}
+              onClick={() => { handleEditImage(`crop`) }}
               disabled={isEditing}
               className="mt-2 mr-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -378,7 +400,7 @@ export default function NewPostPage() {
 
             <button
               type="button"
-              onClick={() => {handleEditImage(`blur`)}}
+              onClick={() => { handleEditImage(`blur`) }}
               disabled={isEditing}
               className="w-20 px-2 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
