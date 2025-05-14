@@ -25,7 +25,7 @@ export default function UserPosts({
         const response = await fetch(`/api/user/posts/${profileUserId}`);
         const data = await response.json();
         if (data.posts) {
-          setPosts(data.posts);
+          setPosts(data.posts.reverse());
           setMessage(null);
         } else {
           setPosts([]);
