@@ -15,4 +15,4 @@ To set up, follow these instructions:
 6. To run dev mode on the website, `npm run dev`
     1. To compile, run `npm run build` and `npm run start`
 
-For hosting with Azure, here is the link: https://cs554finalproj-d3a5f9amh7gvema3.eastus-01.azurewebsites.net
+For hosting with Azure, here is the link: [https://cs554finalproj-d3a5f9amh7gvema3.eastus-01.azurewebsites.net](https://theweb-gadffhftcjhabaez.eastus2-01.azurewebsites.net/)
