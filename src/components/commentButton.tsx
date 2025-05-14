@@ -14,7 +14,12 @@ export default function CommentButton(props: Props) {
 	<>
 	<div>
 		<button className="border border-gray-300 rounded-md"
-		onClick={() => setBox(!box)}>Comment</button>
+		onClick={() => {
+			setBox(!box);
+			setError("");
+		}}>
+			Comment
+		</button>
 
 		{box &&
 		<form>
@@ -29,8 +34,8 @@ export default function CommentButton(props: Props) {
 				(document.getElementById("commentBox") as HTMLInputElement).value;
 				
 				try {
-					if (text === null || text === "")
-						throw "comment cannot be empty";
+					if (text === null || text.length === 0)
+						throw new Error("comment cannot be empty");
 
 					const data = {
 						postId: props.postId,
@@ -43,7 +48,7 @@ export default function CommentButton(props: Props) {
 					});
 					if (!response.ok) {
 						const errorData = await response.json();
-						throw errorData.message;
+						throw new Error(errorData.message);
 					}
 
 				} catch (e) {

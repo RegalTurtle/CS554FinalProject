@@ -24,7 +24,7 @@ export default function LikeButton(props: Props) {
 			});
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw errorData.message;
+				throw new Error(errorData.message);
 			}
 
 		} catch (e) {

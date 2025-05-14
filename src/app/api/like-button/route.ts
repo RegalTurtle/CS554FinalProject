@@ -22,8 +22,8 @@ export async function PATCH(request: Request) {
 			);
 		}
 
-		return NextResponse.json(
-			{message: "Post (un)liked successfully"},
+		return new NextResponse(
+			null,
 			{status: 204}
 		);
 
