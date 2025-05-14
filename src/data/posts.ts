@@ -5,8 +5,8 @@ import * as redis from 'redis';
 import { User, getUser } from './users';
 
 // const client = redis.createClient({ url: `redis://173.3.80.96:6379` });
-const client = redis.createClient();
-await client.connect();
+//const client = redis.createClient();
+//await client.connect();
 
 type PublicUser = Omit<User, "password">;
 
@@ -76,12 +76,12 @@ export const createPost = async (
       throw new Error('Error: Failed to update user with the new post.');
     }
 
-    await client.del(`allPosts`);
-    await client.del(`allPosts-${userId.toString()}`);
+    //await client.del(`allPosts`);
+    //await client.del(`allPosts-${userId.toString()}`);
     // Set Cache with Post Id
 
-    await client.set(`post${postId}`, JSON.stringify(createdPost));
-    await client.expire(`post${postId}`, 3600);
+    //await client.set(`post${postId}`, JSON.stringify(createdPost));
+    //await client.expire(`post${postId}`, 3600);
     console.log('New Post is Cached.');
 
     return { postCreated: true, post: createdPost };
@@ -92,7 +92,7 @@ export const createPost = async (
 };
 
 async function clearRedis() {
-  await client.flushAll();
+  //await client.flushAll();
   console.log('Redis Cleared');
 }
 
@@ -103,12 +103,12 @@ export const getPostById = async (
     if (typeof id === 'string') id = id.trim();
 
     // Check if it is in Cache
-    await clearRedis();
-    const cache = await client.get(`post${id}`);
-    if (cache) {
-      console.log('getPostById: Post is Cached.');
-      return JSON.parse(cache);
-    }
+    // await clearRedis();
+    // const cache = //await client.get(`post${id}`);
+    // if (cache) {
+    //   console.log('getPostById: Post is Cached.');
+    //   return JSON.parse(cache);
+    // }
 
     // If not get from Database
     const postCollection = await posts();
@@ -122,8 +122,8 @@ export const getPostById = async (
     };
 
     // Cache
-    await client.set(`post${id}`, JSON.stringify(post));
-    await client.expire(`post${id}`, 3600);
+    //await client.set(`post${id}`, JSON.stringify(post));
+    //await client.expire(`post${id}`, 3600);
     console.log('getPostById: Post cached with base64 image.');
 
     return { postFound: true, post: processedPost };
@@ -140,11 +140,11 @@ export const getAllPosts = async (): Promise<{
   try {
     // Check if it is in Cache
 
-    const cache = await client.get(`allPosts`);
-    if (cache) {
-      console.log('getAllPosts: All Posts is Cached');
-      return JSON.parse(cache);
-    }
+    // const cache = //await client.get(`allPosts`);
+    // if (cache) {
+    //   console.log('getAllPosts: All Posts is Cached');
+    //   return JSON.parse(cache);
+    // }
 
     // If not get from Database
     const postCollection = await posts();
@@ -156,8 +156,8 @@ export const getAllPosts = async (): Promise<{
 
     // Cache
 
-    await client.set(`allPosts`, JSON.stringify(allPosts));
-    await client.expire(`allPosts`, 3600);
+    //await client.set(`allPosts`, JSON.stringify(allPosts));
+    //await client.expire(`allPosts`, 3600);
     console.log(`getAllPosts: All Posts Returned from Cache.`);
     return { allPostsFound: true, allPosts };
   } catch (e) {
@@ -206,13 +206,13 @@ export const updatePost = async (
 
     // Since it is Mutation, we delete getAllPosts, postById (all queries)
 
-    await client.del(`post${id}`);
-    await client.del(`allPosts`);
-    await client.del(`allPosts-${updatedPost.userId.toString()}`);
+    //await client.del(`post${id}`);
+    //await client.del(`allPosts`);
+    //await client.del(`allPosts-${updatedPost.userId.toString()}`);
     // Add the updated Post into cache.
 
-    await client.set(`post${id}`, JSON.stringify(updatedPost));
-    await client.expire(`post${id}`, 3600);
+    //await client.set(`post${id}`, JSON.stringify(updatedPost));
+    //await client.expire(`post${id}`, 3600);
     console.log(`updatePost: Post Updated into Cache!`);
 
     return { postUpdated: true, updatedPost };
@@ -250,9 +250,9 @@ export const deletePost = async (
 
     // Since it is Mutation, we delete getAllPosts, postById (all queries)
 
-    await client.del(`post${id}`);
-    await client.del(`allPosts`);
-    await client.del(`allPosts-${deletedPost.userId.toString()}`);
+    //await client.del(`post${id}`);
+    //await client.del(`allPosts`);
+    //await client.del(`allPosts-${deletedPost.userId.toString()}`);
 
     return { postDeleted: true, deletedPost: deletedPost };
   } catch (e) {
@@ -270,12 +270,12 @@ export const getAllPostsByUser = async (
   try {
     if (typeof userId === 'string') userId = userId.trim();
     // Check if it is in Cache
-    await clearRedis();
-    const cache = await client.get(`allPosts-${userId.toString()}`);
-    if (cache) {
-      console.log('getAllPosts: All Posts is Cached');
-      return JSON.parse(cache);
-    }
+    // await clearRedis();
+    // const cache = //await client.get(`allPosts-${userId.toString()}`);
+    // if (cache) {
+    //   console.log('getAllPosts: All Posts is Cached');
+    //   return JSON.parse(cache);
+    // }
 
     // If not get from Database
     const postCollection = await posts();
@@ -288,8 +288,8 @@ export const getAllPostsByUser = async (
     });
 
     // Cache
-    await client.set(`allPosts-${userId.toString()}`, JSON.stringify(allPosts));
-    await client.expire(`allPosts-${userId.toString()}`, 3600);
+    //await client.set(`allPosts-${userId.toString()}`, JSON.stringify(allPosts));
+    //await client.expire(`allPosts-${userId.toString()}`, 3600);
     console.log(`getAllPosts: All Posts Returned from DB.`);
 
     return allPosts;
@@ -342,11 +342,11 @@ export const likePost = async (
     });
     newPost.image = newPost.image.toString();
     updatedPost.image = updatedPost.image.toString();
-    await client.del(`post${postId}`);
-    await client.del(`allPosts`);
-    await client.del(`allPosts-${updatedPost.userId.toString()}`);
-    await client.set(`post${postId}`, JSON.stringify(updatedPost));
-    await client.expire(`post${postId}`, 3600);
+    //await client.del(`post${postId}`);
+    //await client.del(`allPosts`);
+    //await client.del(`allPosts-${updatedPost.userId.toString()}`);
+    //await client.set(`post${postId}`, JSON.stringify(updatedPost));
+    //await client.expire(`post${postId}`, 3600);
     console.log(`updatePost: Post Updated into Cache!`);
 
     return {
@@ -407,11 +407,11 @@ export const createComment = async (
     newPost.image = newPost.image.toString();
     updatedPost.image = updatedPost.image.toString();
 
-    await client.del(`post${postId}`);
-    await client.del(`allPosts`);
-    await client.del(`allPosts-${updatedPost.userId.toString()}`);
-    await client.set(`post${postId}`, JSON.stringify(updatedPost));
-    await client.expire(`post${postId}`, 3600);
+    //await client.del(`post${postId}`);
+    //await client.del(`allPosts`);
+    //await client.del(`allPosts-${updatedPost.userId.toString()}`);
+    //await client.set(`post${postId}`, JSON.stringify(updatedPost));
+    //await client.expire(`post${postId}`, 3600);
     console.log(`updatePost: Post Updated into Cache!`);
 
     return {

@@ -20,9 +20,8 @@ export default function FeedPage() {
       try {
         const response = await fetch(`/api/post`);
         const data = await response.json();
-        console.log(data.posts)
-        if (data.posts) {
-          setPosts(data.posts.reverse());
+        if (data.posts.allPosts) {
+          setPosts(data.posts.allPosts.reverse());
           setMessage(null);
         } else {
           setPosts([]);

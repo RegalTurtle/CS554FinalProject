@@ -17,8 +17,8 @@ const base64Image = imageBuffer.toString('base64');
 
 import * as redis from 'redis';
 // const client = redis.createClient({ url: `redis://173.3.80.96:6379` });
-const client = redis.createClient();
-await client.connect();
+//const client = redis.createClient();
+//await client.connect();
 
 export interface Friend {
   userId: ObjectId;
@@ -103,13 +103,13 @@ export const registerUser = async (
     _id: userId
   }
   //commented out because it was causing a weird error
-  await client.set(`user${userId}`, JSON.stringify(completedUserWithoutPassword));
-  await client.set(`user${newUser.email}`, JSON.stringify(completedUserWithoutPassword));
-  await client.expire(`user${userId}`, 3600);
-  await client.expire(`user${newUser.email}`, 3600);
+  //await client.set(`user${userId}`, JSON.stringify(completedUserWithoutPassword));
+  //await client.set(`user${newUser.email}`, JSON.stringify(completedUserWithoutPassword));
+  //await client.expire(`user${userId}`, 3600);
+  //await client.expire(`user${newUser.email}`, 3600);
 
   // console.log('New User is Cached.');
-  await client.del(`allUsers`);
+  //await client.del(`allUsers`);
   return { signupCompleted: true };
 };
 
@@ -168,11 +168,11 @@ export const comparePass = async (
 export const getUserByemail = async (
   email: string
 ): Promise<Omit<User, 'password'>> => {
-  const cache = await client.get(`user${email}`);
-  if (cache) {
-    console.log('getUserByEmail: User is Cached.');
-    return JSON.parse(cache);
-  }
+  // const cache = //await client.get(`user${email}`);
+  // if (cache) {
+  //   console.log('getUserByEmail: User is Cached.');
+  //   return JSON.parse(cache);
+  // }
 
   email = email.trim();
 
@@ -184,18 +184,18 @@ export const getUserByemail = async (
   delete user.password;
   user._id = user._id.toString();
 
-  await client.set(`user${email}`, JSON.stringify(user));
-  await client.expire(`user${email}`, 3600);
+  //await client.set(`user${email}`, JSON.stringify(user));
+  //await client.expire(`user${email}`, 3600);
   return user;
 };
 
 // Get user by ID
 export const getUser = async (id: string): Promise<Omit<User, 'password'>> => {
-  const cache = await client.get(`user${id}`);
-  if (cache) {
-    console.log('getUser: User is Cached.');
-    return JSON.parse(cache);
-  }
+  // const cache = //await client.get(`user${id}`);
+  // if (cache) {
+  //   console.log('getUser: User is Cached.');
+  //   return JSON.parse(cache);
+  // }
 
   id = id.trim();
   if (!ObjectId.isValid(id)) throw new Error('Invalid object ID');
@@ -210,8 +210,8 @@ export const getUser = async (id: string): Promise<Omit<User, 'password'>> => {
   delete user.password;
   user._id = user._id.toString();
 
-  await client.set(`user${id}`, JSON.stringify(user));
-  await client.expire(`user${id}`, 3600);
+  //await client.set(`user${id}`, JSON.stringify(user));
+  //await client.expire(`user${id}`, 3600);
   return user;
 };
 
@@ -222,11 +222,11 @@ export const getAllUsers = async (): Promise<{
   try {
     let fields: { name?: RegExp } = {}
 
-    const cache = await client.get(`allUsers`);
-    if (cache) {
-      console.log('getAllUsers: All Users is Cached');
-      return JSON.parse(cache);
-    }
+    // const cache = //await client.get(`allUsers`);
+    // if (cache) {
+    //   console.log('getAllUsers: All Users is Cached');
+    //   return JSON.parse(cache);
+    // }
 
 
     const userCollection = await users();
@@ -237,8 +237,8 @@ export const getAllUsers = async (): Promise<{
       return userWithoutPassword;
     });
 
-    await client.set(`allUsers`, JSON.stringify(allUsers));
-    await client.expire(`allUsers`, 3600);
+    //await client.set(`allUsers`, JSON.stringify(allUsers));
+    //await client.expire(`allUsers`, 3600);
     console.log(`getAllUsers: All Users Returned from Cache.`);
     return allUsersWithoutPassword;
   } catch (e) {
@@ -270,8 +270,8 @@ export const addFriend = async (userId: string, friendId: string) => {
       },
       { returnDocument: "after" }
     );
-    await client.del(`user${userId}`);
-    await client.del(`allUsers`);
+    //await client.del(`user${userId}`);
+    //await client.del(`allUsers`);
   } else {
     throw new Error('User is already a friend, waiting to be accepted as a friend or a pending friend.');
   }
@@ -293,7 +293,7 @@ export const addFriend = async (userId: string, friendId: string) => {
       },
       { returnDocument: "after" }
     );
-    await client.del(`user${friendId}`);
+    //await client.del(`user${friendId}`);
   } else {
     throw new Error('User is already a friend, waiting to be accepted as a friend or a pending friend.');
   }
@@ -318,8 +318,8 @@ export const acceptRequest = async (userId: string, friendId: string) => {
         "friends.$.status": "friend"
       }
     });
-  await client.del(`user${userId}`);
-  await client.del(`allUsers`);
+  //await client.del(`user${userId}`);
+  //await client.del(`allUsers`);
   await userCollection.findOneAndUpdate({
     _id: new ObjectId(friendId),
     "friends.userId": new ObjectId(userId)
@@ -329,7 +329,7 @@ export const acceptRequest = async (userId: string, friendId: string) => {
         "friends.$.status": "friend"
       }
     });
-  await client.del(`user${friendId}`);
+  //await client.del(`user${friendId}`);
 
 
 };
@@ -371,6 +371,6 @@ export const updateUser = async (
     );
   }
 
-  await client.del(`user${id}`);
-  await client.del(`allUsers`);
+  //await client.del(`user${id}`);
+  //await client.del(`allUsers`);
 }
