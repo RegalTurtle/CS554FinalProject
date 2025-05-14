@@ -50,7 +50,7 @@ export default function AddUserForm() {
         throw new Error(result.error);
       }
 
-      router.push('/login'); // Adjust as needed
+      router.push('/user/login'); // Adjust as needed
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
@@ -106,7 +106,7 @@ export default function AddUserForm() {
           </label>
           <input
             name="email"
-            type="email"
+            type="text"
             value={formData.email}
             onChange={handleChange}
             required
