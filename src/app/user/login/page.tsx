@@ -77,7 +77,7 @@ export default function LoginForm() {
           </label>
           <input
             name="email"
-            type="email"
+            type="text"
             value={formData.email}
             onChange={handleChange}
             required

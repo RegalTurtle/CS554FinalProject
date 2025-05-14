@@ -5,7 +5,7 @@ import { env } from '@/src/config/settings.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
+import * as validate from './validation'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -37,6 +37,19 @@ export interface User {
   bio: String;
 }
 
+export const checkValidUserId = async (id: string) => {
+  id = id.trim();
+  if (!ObjectId.isValid(id)) throw new Error('Invalid object ID');
+
+  const userCollection = await users();
+  const user = await userCollection.findOne({ _id: new ObjectId(id) });
+
+  if (!user) {
+    throw new Error('No user with that id');
+  }
+  return id
+}
+
 // Register a user
 export const registerUser = async (
   firstName: string,
@@ -45,6 +58,10 @@ export const registerUser = async (
   password: string
 ): Promise<{ signupCompleted: boolean }> => {
   const saltRounds = 3;
+  firstName = validate.isValidName(firstName, "First Name")
+  lastName = validate.isValidName(lastName, "Last Name")
+  email = validate.checkIsProperEmail(email, "Email")
+  password = validate.checkIsProperPassword(password, "Password", 8)
   const hash = await bcrypt.hash(password, saltRounds);
 
   const collectionUser = await users();
@@ -101,6 +118,9 @@ export const loginUser = async (
   email: string,
   password: string
 ): Promise<any> => {
+
+  email = validate.checkIsProperEmail(email, "Email")
+  password = validate.checkIsProperPassword(password, "Password", 8)
   const collectionUser = await users();
   const userCheck = await collectionUser.findOne({
     email: email.toLowerCase(),
@@ -228,10 +248,9 @@ export const getAllUsers = async (): Promise<{
 
 export const addFriend = async (userId: string, friendId: string) => {
 
-  userId = userId.trim();
-  if (!ObjectId.isValid(userId)) throw new Error('Invalid object ID');
-  friendId = friendId.trim();
-  if (!ObjectId.isValid(userId)) throw new Error('Invalid object ID');
+  userId = await checkValidUserId(userId);
+  friendId = await checkValidUserId(friendId)
+
   const userCollection = await users();
 
   const user = await userCollection.findOne({
@@ -285,10 +304,9 @@ export const addFriend = async (userId: string, friendId: string) => {
 export const acceptRequest = async (userId: string, friendId: string) => {
 
 
-  userId = userId.trim();
-  if (!ObjectId.isValid(userId)) throw new Error('Invalid object ID');
-  friendId = friendId.trim();
-  if (!ObjectId.isValid(userId)) throw new Error('Invalid object ID');
+  userId = await checkValidUserId(userId);
+  friendId = await checkValidUserId(friendId)
+
   const userCollection = await users();
 
   await userCollection.findOneAndUpdate({
@@ -324,40 +342,35 @@ export const updateUser = async (
       image?: string
     }
 ) => {
-  try {
-    console.log(data)
-    console.log(id)
-    let name = data.name
-    let bio = data.bio
-    if (name) name = name.trim();
-    if (bio) bio = bio.trim();
 
-    const updateData: { name?: string; bio?: string, image?: string } = { bio: "" };
-    if (name) updateData.name = name;
-    if (bio) updateData.bio = bio;
+  id = await checkValidUserId(id.toString());
+  let name = data.name
+  let bio = data.bio
+  name = validate.isValidName(name, "Name")
+  if (name) name = name.trim();
+  if (bio) bio = validate.checkIsProperString(bio, "Bio", null, 250)
 
-    if (data.image) {
-      updateData.image = data.image
-    }
+  const updateData: { name?: string; bio?: string, image?: string } = { bio: "" };
+  if (name) updateData.name = name;
+  if (bio) updateData.bio = bio;
 
-    const userCollection = await users();
+  if (data.image) {
+    updateData.image = data.image
+  }
 
-    const result = await userCollection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: updateData }
-    );
-    console.log(result)
-    if (!result.acknowledged) {
-      throw new Error(
-        'Unable to Update'
-      );
-    }
+  const userCollection = await users();
 
-    await client.del(`user${id}`);
-    await client.del(`allUsers`);
-  } catch (e) {
+  const result = await userCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: updateData }
+  );
+
+  if (!result.acknowledged) {
     throw new Error(
       'Unable to Update'
     );
   }
-};
+
+  await client.del(`user${id}`);
+  await client.del(`allUsers`);
+}
