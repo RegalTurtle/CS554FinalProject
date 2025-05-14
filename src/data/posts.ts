@@ -283,7 +283,7 @@ export const getAllPostsByUser = async (
     const allPosts = await postCollection
       .find({ userId: new ObjectId(userId) })
       .toArray();
-    if (!allPosts) throw new Error('getAllPosts: All Posts Not Found.');
+    if (!allPosts) throw new Error('No Posts Found.');
     allPosts.map((post: Post) => {
       post.image = post.image.toString();
     });
