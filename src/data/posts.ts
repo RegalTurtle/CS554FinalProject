@@ -317,7 +317,7 @@ export const likePost = async (
     const user: PublicUser | undefined = await getUser(userId.toString());
     if (!user)
       throw `no user with ID ${userId}`;
-    let newLikedUsers: (PublicUser | null)[] = post.likedUsers;
+    let newLikedUsers: PublicUser[] = post.likedUsers;
 
     if (newLikedUsers.find((elem) => elem !== null && elem._id.toString() === user._id.toString()) !== undefined) {
       newLikedUsers = newLikedUsers.filter((elem) => elem === null || elem._id.toString() !== user._id.toString());
