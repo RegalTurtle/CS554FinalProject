@@ -9,6 +9,13 @@ export async function PATCH(request: Request) {
 
   try {
     session = await getSession();
+    if (!session.userId) {
+      return NextResponse.json(
+        { message: "Must be signed in" },
+        { status: 400 }
+      );
+    }
+
     if (session?.userId) {
       userId = session.userId;
     }
