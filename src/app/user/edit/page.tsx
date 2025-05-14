@@ -93,8 +93,8 @@ export default function UpdateProfile() {
       // Send to API
       const response = await editProfile(postData);
 
-      if (response?.message) {
-        throw new Error(response.message || 'Failed to Update Profile');
+      if (response?.error) {
+        throw new Error(response.error || 'Failed to Update Profile');
       }
 
       router.push(`/user/${sessionUser?._id.toString()}`);

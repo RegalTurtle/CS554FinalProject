@@ -3,9 +3,6 @@ import { useState, useEffect } from 'react';
 import { requestFriend, acceptFriend } from '@/src/app/user/actions';
 import type { Friend as FriendType } from '@/src/data/users';
 import { useActionState } from 'react';
-const initialState = {
-    message: null
-};
 export const dynamic = 'force-dynamic';
 import { User } from '@/src/data/users';
 type PublicUser = Omit<User, 'password'>;
@@ -32,7 +29,7 @@ export default function Friend({ profileId, sessionUser, onFriendChange }: { pro
         try {
             const result = await requestFriend(sessionUser._id.toString(), profileId);
             if (result) {
-                setMessage(result.message);
+                setMessage(result.error);
             }
             else {
                 setStatus("pending")
@@ -46,7 +43,7 @@ export default function Friend({ profileId, sessionUser, onFriendChange }: { pro
         try {
             const result = await acceptFriend(sessionUser._id.toString(), profileId);
             if (result) {
-                setMessage(result.message);
+                setMessage(result.error);
             }
             else {
                 setStatus("friend")

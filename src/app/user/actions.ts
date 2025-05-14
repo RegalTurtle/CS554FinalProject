@@ -5,10 +5,6 @@ import { registerUser, loginUser, addFriend, acceptRequest, getAllUsers, updateU
 import { getAllPostsByUser } from "@/src/data/posts";
 import { revalidatePath } from 'next/cache';
 
-interface FormState {
-    message: string[] | null;
-}
-
 export async function editProfile(data: any) {
     let session = await getSession()
     let userId: string
@@ -17,7 +13,7 @@ export async function editProfile(data: any) {
     } else {
         return {
 
-            message: 'User not signed in',
+            error: 'User not signed in',
         };
     }
     try {
@@ -25,7 +21,7 @@ export async function editProfile(data: any) {
     } catch (error: any) {
         return {
 
-            message: error.message || 'Could not update profile',
+            error: error.message || 'Could not update profile',
         };
     }
 }
@@ -48,22 +44,22 @@ export async function createUser(
 
     if (typeof firstName !== 'string' || !firstName.trim()) {
         error = 'First name is required.';
-        return { message: error };
+        return { error: error };
     }
 
     if (typeof lastName !== 'string' || !lastName.trim()) {
         error = ('Last name is required.');
-        return { message: error };
+        return { error: error };
     }
 
     if (typeof email !== 'string' || !email.trim()) {
         error = ('Email is required.');
-        return { message: error };
+        return { error: error };
     }
 
     if (typeof password !== 'string' || !password.trim()) {
         error = ('Password is required.');
-        return { message: error };
+        return { error: error };
     }
 
     try {
@@ -74,7 +70,6 @@ export async function createUser(
             password as string
         );
     } catch (error: any) {
-        console.log(error)
         return {
 
             error: error.message || 'An error occurred during registration.',
@@ -99,12 +94,12 @@ export async function login(
 
     if (typeof email !== 'string' || !email.trim()) {
         error = ('Email is required.');
-        return { message: error };
+        return { error: error };
     }
 
     if (typeof password !== 'string' || !password.trim()) {
         error = ('Password is required.');
-        return { message: error };
+        return { error: error };
 
     }
     let user;
@@ -134,8 +129,7 @@ export async function requestFriend(userId: string, friendId: string) {
     } catch (error: any) {
         return {
 
-            message: [error.message || 'An error occurred during registration.'],
-            status: null
+            error: error.message || 'An error occurred during registration.',
         };
     }
 }
@@ -146,26 +140,7 @@ export async function acceptFriend(userId: string, friendId: string) {
     } catch (error: any) {
         return {
 
-            message: [error.message || 'An error occurred during registration.'],
-            status: null
+            error: error.message || 'An error occurred during registration.',
         };
     }
-}
-
-export async function getUsers() {
-    let users: any = []
-    try {
-        users = await getAllUsers()
-    } catch (error: any) {
-        return {
-
-            message: [error.message || 'An error occurred during registration.'],
-            users: users
-        };
-    }
-    return {
-
-        message: [],
-        users: users
-    };
 }

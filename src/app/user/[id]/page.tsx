@@ -5,6 +5,7 @@ import { User } from '@/src/data/users';
 import UserPosts from '../userPosts';
 import IndividualUser from '../individualUser';
 import Link from 'next/link';
+import NotFound from '@/src/app/not-found';
 type PublicUser = Omit<User, 'password'>;
 export const dynamic = 'force-dynamic';
 export default function profile({
@@ -15,20 +16,28 @@ export default function profile({
   const [sessionUser, setSessionUser] = useState<PublicUser | null>(null);
   const [user, setUser] = useState<PublicUser | null>(null);
   const [loading, setLoading] = useState<boolean>(!user);
+  const [error, setError] = useState<boolean>(false);
   const { id } = use(params);
   async function fetchUserData() {
+
     const response = await fetch(`/api/user/${id}`);
     const data = await response.json();
-    setUser(data.user);
-    if (sessionUser && sessionUser._id == id) {
-      setSessionUser(data.user)
+    if (!data.user) {
+      setError(true)
+    } else {
+      setUser(data.user);
+      if (sessionUser && sessionUser._id == id) {
+        setSessionUser(data.user)
+      }
     }
+
   }
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      fetchUserData();
+      setError(false)
+      await fetchUserData();
 
       let response = await fetch(`/api/session`);
       let data = await response.json();
@@ -138,6 +147,10 @@ export default function profile({
   if (loading) {
     return <div>Loading...</div>;
   }
+  if (error) {
+    return <NotFound />;
+  }
+
 
   return (
     <div className="w-full max-w-6xl mx-auto px-6">
