@@ -4,13 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 export const dynamic = 'force-dynamic';
 import { User } from '@/src/data/users';
 import IndividualUser from './individualUser';
-import { getUsers } from '@/src/app/user/actions';
 import Link from 'next/link';
 type PublicUser = Omit<User, 'password'>;
-const initialState = {
-  message: [],
-  user: []
-};
 export default function searchUser() {
   const [sessionUser, setSessionUser] = useState<PublicUser | null>(null);
   const [users, setUsers] = useState<PublicUser[]>([]);
