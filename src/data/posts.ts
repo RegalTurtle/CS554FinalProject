@@ -159,7 +159,6 @@ export const getAllPosts = async (): Promise<{
     await client.set(`allPosts`, JSON.stringify(allPosts));
     await client.expire(`allPosts`, 3600);
     console.log(`getAllPosts: All Posts Returned from Cache.`);
-
     return { allPostsFound: true, allPosts };
   } catch (e) {
     console.error(e);
