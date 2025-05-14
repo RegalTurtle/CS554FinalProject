@@ -34,10 +34,10 @@ export default function Header() {
                     {session?.userId && (
                         <>
                             <li><Link href={`/user/${session.userId}`}>Profile</Link></li>
-                            <li><Link href={`/user`}>Search</Link></li>
                             <li><Link href={`/post/new`}>New Post</Link></li>
                         </>
                     )}
+                    <li><Link href={`/user`}>Search</Link></li>
                     {!session?.userId && (
                         <>
                             <li><Link href={'/user/login'}>Login</Link></li>
