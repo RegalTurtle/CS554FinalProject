@@ -8,6 +8,18 @@ import { getUser } from "./users";
 const client = redis.createClient();
 await client.connect();
 
+export interface User {
+  _id: ObjectId | string;
+  name: string;
+  email: string;
+  image: string;
+  password: string;
+  verified: boolean;
+  friends: Friend[];
+  private: boolean;
+  bio: String;
+}
+
 type PublicUser = Omit<User, "password">;
 
 export interface Post {
