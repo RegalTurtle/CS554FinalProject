@@ -1,68 +1,65 @@
 'use server';
 import { createSession, deleteSession, getSession } from "@/src/lib/session";
 import { redirect } from 'next/navigation';
-import { registerUser, loginUser, addFriend, acceptRequest, getAllUsers } from '@/src/data/users';
+import { registerUser, loginUser, addFriend, acceptRequest, getAllUsers, updateUser } from '@/src/data/users';
 import { getAllPostsByUser } from "@/src/data/posts";
 import { revalidatePath } from 'next/cache';
 
-interface FormState {
-    message: string[] | null;
-}
+export async function editProfile(data: any) {
+    let session = await getSession()
+    let userId: string
+    if (session?.userId) {
+        userId = session.userId.toString()
+    } else {
+        return {
 
-export async function getPosts(userId: string) {
-    let posts: any = {}
+            error: 'User not signed in',
+        };
+    }
     try {
-        posts = await getAllPostsByUser(userId)
+        await updateUser(userId, data)
     } catch (error: any) {
         return {
 
-            message: [error.message || 'Could not get all posts'],
-            posts: null
+            error: error.message || 'Could not update profile',
         };
     }
-    if (posts.allPostsFound) {
-        return {
-
-            message: [],
-            posts: posts.allPosts
-        };
-    }
-    return {
-
-        message: ['Could not get all posts'],
-        posts: null
-    };
 }
 
 export async function createUser(
-    prevState: FormState,
-    formData: FormData
-): Promise<FormState> {
-    const firstName = formData.get('firstName');
-    const lastName = formData.get('lastName');
-    const email = formData.get('email');
-    const password = formData.get('password');
+    {
+        firstName,
+        lastName,
+        email,
+        password
+    }: {
+        firstName: string,
+        lastName: string,
+        email: string,
+        password: string
+    }
+) {
 
-    const errors: string[] = [];
+    let error: string;
 
     if (typeof firstName !== 'string' || !firstName.trim()) {
-        errors.push('First name is required.');
+        error = 'First name is required.';
+        return { error: error };
     }
 
     if (typeof lastName !== 'string' || !lastName.trim()) {
-        errors.push('Last name is required.');
+        error = ('Last name is required.');
+        return { error: error };
     }
 
     if (typeof email !== 'string' || !email.trim()) {
-        errors.push('Email is required.');
+        error = ('Email is required.');
+        return { error: error };
     }
 
     if (typeof password !== 'string' || !password.trim()) {
-        errors.push('Password is required.');
-    }
-
-    if (errors.length > 0) {
-        return { message: errors };
+        error = ('Password is required.');
+        return { error: error };
     }
 
     try {
@@ -73,37 +70,37 @@ export async function createUser(
             password as string
         );
     } catch (error: any) {
-        console.log(error)
         return {
 
-            message: [error.message || 'An error occurred during registration.'],
+            error: error.message || 'An error occurred during registration.',
         };
     }
-    redirect(`/user/login`); // Navigate to new route
 
 }
 
 
 
 export async function login(
-    prevState: FormState,
-    formData: FormData
-): Promise<FormState> {
-    const email = formData.get('email');
-    const password = formData.get('password');
+    {
+        email,
+        password
+    }: {
+        email: string,
+        password: string
+    }
+) {
 
-    const errors: string[] = [];
+    let error: string;
 
     if (typeof email !== 'string' || !email.trim()) {
-        errors.push('Email is required.');
+        error = ('Email is required.');
+        return { error: error };
     }
 
     if (typeof password !== 'string' || !password.trim()) {
-        errors.push('Password is required.');
-    }
+        error = ('Password is required.');
+        return { error: error };
 
-    if (errors.length > 0) {
-        return { message: errors };
     }
     let user;
     try {
@@ -111,13 +108,12 @@ export async function login(
             email as string,
             password as string
         );
+        await createSession(user._id);
     } catch (error: any) {
         return {
-            message: [error.message || 'An error occurred during login.'],
+            error: error.message || 'An error occurred during login.',
         };
     }
-    await createSession(user._id);
-    redirect(`/user/${user._id.toString()}`);
 
 }
 
@@ -133,8 +129,7 @@ export async function requestFriend(userId: string, friendId: string) {
     } catch (error: any) {
         return {
 
-            message: [error.message || 'An error occurred during registration.'],
-            status: null
+            error: error.message || 'An error occurred during registration.',
         };
     }
 }
@@ -145,26 +140,7 @@ export async function acceptFriend(userId: string, friendId: string) {
     } catch (error: any) {
         return {
 
-            message: [error.message || 'An error occurred during registration.'],
-            status: null
+            error: error.message || 'An error occurred during registration.',
         };
     }
-}
-
-export async function getUsers() {
-    let users: any = []
-    try {
-        users = await getAllUsers()
-    } catch (error: any) {
-        return {
-
-            message: [error.message || 'An error occurred during registration.'],
-            users: users
-        };
-    }
-    return {
-
-        message: [],
-        users: users
-    };
 }

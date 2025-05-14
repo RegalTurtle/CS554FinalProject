@@ -8,8 +8,7 @@ export async function GET(req: Request) {
     try {
         session = await getSession()
     } catch (error: any) {
-        return NextResponse.json({ error: error }, { status: 500 });
-    } finally {
-        return NextResponse.json({ session }, { status: 200 });
+        return NextResponse.json({ session: null }, { status: 200 });
     }
+    return NextResponse.json({ session }, { status: 200 });
 }

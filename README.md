@@ -1,36 +1,18 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Welcome to The Web, our CS554 fianal project
 
-## Getting Started
+To set up, follow these instructions:
+1. Have Node and npm installed
+2. Run `npm i` to install dependancies
+3. Check you have a correctly formatted `.env` file. It should have:
+    1. `MONGO_URI`: an optional URI for the Mongo database. If ommitted, uses locally hosted
+    2. `USE_IM`: Set to `true` or `false` depending on whether you want to load ImageMagick
+        1. If you set `USE_IM=false`, the site will default to using Sharp, and you can skip step 4
+    3. `SESSION_SECRET`: Used for tracking the session
+4. If using ImageMagick, ensure IM is installed via `sudo apt install imagemagick` or similar using a package manager
+    1. ImageMagick features require ImageMagick to be installed
+    2. Some ImageMagick features are not available on Windows, such as grayscale
+5. If you would like to get a small seed of data, you have to use the route `GET /api/seed/`. Look in the file to see a couple of the provided usernames and passwords
+6. To run dev mode on the website, `npm run dev`
+    1. To compile, run `npm run build` and `npm run start`
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For hosting with Azure, here is the link: https://cs554finalproj-d3a5f9amh7gvema3.eastus-01.azurewebsites.net
