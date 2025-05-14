@@ -15,14 +15,14 @@ export const seed = async (): Promise<void> => {
   await client.flushAll();
   console.log('Database dropped');
 
-  await registerUser("Thys", "Vanderschoot", "thysvanderschoot@gmail.com", "GoodPassword123");
-  await registerUser("Annika", "Vanderschoot", "annikavanderschoot@gmail.com", "AnotherPassword123");
+  await registerUser("Thys", "Vanderschoot", "thysvanderschoot@gmail.com", "GoodPass123!");
+  await registerUser("Annika", "Vanderschoot", "annikavanderschoot@gmail.com", "AnotherPass123!");
   const thysObj = await getUserByemail("thysvanderschoot@gmail.com");
   const annikaObj = await getUserByemail("annikavanderschoot@gmail.com");
 
   await addFriend(annikaObj._id.toString(), thysObj._id.toString());
   await acceptRequest(thysObj._id.toString(), annikaObj._id.toString());
-  await registerUser("Sam", "Schwartz", "samschwartz@gmail.com", "BestPassword123");
+  await registerUser("Sam", "Schwartz", "samschwartz@gmail.com", "BestPass123!");
 
   const base64Image1 = (await fs.readFile("./src/scripts/image1.jpg")).toString('base64');
   const image1Buffer = Buffer.from(base64Image1);
