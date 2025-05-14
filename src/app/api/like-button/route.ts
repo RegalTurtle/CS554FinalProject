@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 export async function PATCH(request: Request) {
   let session: any;
-  let userId: ObjectId | string | undefined = undefined;
+  let userId: ObjectId | string;
 
   try {
     session = await getSession();
@@ -14,10 +14,8 @@ export async function PATCH(request: Request) {
         { message: "Must be signed in" },
         { status: 400 }
       );
-    }
-
-    if (session?.userId) {
-      userId = session.userId;
+    } else {
+	userId = session.userId;
     }
 
     const data = await request.json();

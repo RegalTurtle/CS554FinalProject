@@ -16,12 +16,12 @@ export interface Post {
   title: string;
   image: Buffer | string;
   caption: string;
-  likedUsers: (PublicUser | null)[];
+  likedUsers: PublicUser[];
   comments: Comment[];
 }
 
 export interface Comment {
-  user: PublicUser | null;
+  user: PublicUser;
   text: string;
 }
 
@@ -301,7 +301,7 @@ export const getAllPostsByUser = async (
 
 export const likePost = async (
   postId: ObjectId | string,
-  userId?: ObjectId | string
+  userId: ObjectId | string
 ): Promise<{
   postUpdated: boolean;
   updatedPost?: Post;
@@ -311,21 +311,18 @@ export const likePost = async (
 
     const postObj = await getPostById(postId);
     const post: Post | undefined = postObj.post;
-    if (post === undefined) throw `no post with ID ${postId}`;
+    if (post === undefined)
+      throw `no post with ID ${postId}`;
 
-    let user: PublicUser | undefined = undefined;
-    if (userId)
-      user = await getUser(userId.toString());
+    const user: PublicUser | undefined = await getUser(userId.toString());
+    if (!user)
+      throw `no user with ID ${userId}`;
     let newLikedUsers: (PublicUser | null)[] = post.likedUsers;
 
-    if (user) {
-      if (newLikedUsers.find((elem) => elem !== null && elem._id.toString() === user._id.toString()) !== undefined) {
-        newLikedUsers = newLikedUsers.filter((elem) => elem === null || elem._id.toString() !== user._id.toString());
-      } else {
-        newLikedUsers.push(user);
-      }
+    if (newLikedUsers.find((elem) => elem !== null && elem._id.toString() === user._id.toString()) !== undefined) {
+      newLikedUsers = newLikedUsers.filter((elem) => elem === null || elem._id.toString() !== user._id.toString());
     } else {
-      newLikedUsers.push(null);
+      newLikedUsers.push(user);
     }
 
     const postCollection = await posts();
@@ -366,7 +363,7 @@ export const likePost = async (
 export const createComment = async (
   postId: ObjectId | string,
   text: string,
-  userId?: ObjectId | string
+  userId: ObjectId | string
 ): Promise<{
   postUpdated: boolean;
   updatedPost?: Post;
@@ -378,11 +375,12 @@ export const createComment = async (
 
     const postObj = await getPostById(postId);
     const post: Post | undefined = postObj.post;
-    if (post === undefined) throw `no post with ID ${postId}`;
+    if (!post)
+      throw `no post with ID ${postId}`;
 
-    let user: PublicUser | null = null;
-    if (userId)
-      user = await getUser(userId.toString());
+    const user: PublicUser | undefined = await getUser(userId.toString());
+    if (!user)
+      throw `no user with ID ${userId}`;
 
     const comment: Comment = {
       user: user,
@@ -409,7 +407,7 @@ export const createComment = async (
     });
     newPost.image = newPost.image.toString();
     updatedPost.image = updatedPost.image.toString();
-    
+
     await client.del(`post${postId}`);
     await client.del(`allPosts`);
     await client.del(`allPosts-${updatedPost.userId.toString()}`);
