@@ -30,9 +30,9 @@ export default function Home() {
         </h1> */}
         <div className="flex justify-center items-center w-full">
           <Image alt="A spider web divided horizontally in the middle with the words THE WEB in blue filling the gap"
-          src="/the_web.png" width={400} height={400} />
+            src="/the_web.png" width={400} height={400} />
         </div>
-        
+
         <p className="text-lg mb-8 leading-relaxed">
           <strong>The Web</strong> is a social media platform designed to help
           you share life’s moments and connect with others. Create a
@@ -48,12 +48,20 @@ export default function Home() {
         <div className="flex justify-center gap-4 mt-6">
 
           {session?.userId && (
-            <Link
-              className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"
-              href={`/user/${session.userId}`}
-            >
-              Profile
-            </Link>
+            <>
+              <Link
+                className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"
+                href={`/user/${session.userId}`}
+              >
+                Profile
+              </Link>
+              <Link
+                className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"
+                href={`/post`}
+              >
+                Feed
+              </Link>
+            </>
           )}
           {!session?.userId && (
             <>

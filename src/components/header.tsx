@@ -30,14 +30,14 @@ export default function Header() {
             <nav className="mt-2">
                 <ul className="flex gap-4">
                     <li><Link href={'/'}>Home</Link></li>
-
+                    <li><Link href={`/post`}>Feed</Link></li>
+                    <li><Link href={`/user`}>Search</Link></li>
                     {session?.userId && (
                         <>
                             <li><Link href={`/user/${session.userId}`}>Profile</Link></li>
                             <li><Link href={`/post/new`}>New Post</Link></li>
                         </>
                     )}
-                    <li><Link href={`/user`}>Search</Link></li>
                     {!session?.userId && (
                         <>
                             <li><Link href={'/user/login'}>Login</Link></li>
