@@ -29,7 +29,7 @@ export default function CommentButton(props: Props) {
 				(document.getElementById("commentBox") as HTMLInputElement).value;
 				
 				try {
-					if (text === null || text === "")
+					if (!text || text.trim().length === 0)
 						throw "comment cannot be empty";
 
 					const data = {
