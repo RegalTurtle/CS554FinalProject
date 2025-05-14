@@ -80,6 +80,9 @@ export default function NewPostPage() {
         throw new Error('Please select an image');
       }
 
+      if (!['png', 'jpg', 'jpeg'].includes(formData.image.type))
+        throw new Error('Images must be png, jpg, or jpeg');
+
       // Convert image to base64
       const base64Image = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -117,7 +120,7 @@ export default function NewPostPage() {
 
       router.push('/');
     } catch (err) {
-      console.error('Error creating post:', err);
+      // console.error('Error creating post:', err);
       setError(
         err instanceof Error ? err.message : 'An unknown error occurred'
       );
@@ -134,6 +137,9 @@ export default function NewPostPage() {
       if (!formData.image) {
         throw new Error('Please select an image');
       }
+
+      if (!['png', 'jpg', 'jpeg'].includes(formData.image.type))
+        throw new Error('Images must be png, jpg, or jpeg');
 
       // Convert image to base64
       const base64Image = await new Promise<string>((resolve, reject) => {
@@ -188,7 +194,7 @@ export default function NewPostPage() {
       setPreviewImage(imageUrl);
       formData.image = new File([blob], 'edited-image.png', { type: blob.type });
     } catch (e) {
-      console.error('Error creating post:', e);
+      // console.error('Error creating post:', e);
       setError(
         e instanceof Error ? e.message : 'An unknown error occurred'
       );
@@ -230,7 +236,7 @@ export default function NewPostPage() {
             type="file"
             ref={fileInputRef}
             onChange={handleImageChange}
-            accept="image/*"
+            accept=".png, .jpg, .jpeg"
             required
             className="block w-full text-sm text-gray-500
               file:mr-4 file:py-2 file:px-4

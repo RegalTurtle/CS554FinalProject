@@ -25,12 +25,19 @@ export async function POST(request: Request) {
     // get the type of the image provided, if it's not an image, throw error
     let contentType: string;
     if (data.image.contentType.startsWith("image/")) {
-      contentType = data.image.contentType.replace("image/", ""); // → "jpeg"
+      contentType = data.image.contentType.replace("image/", "");
     } else {
       return NextResponse.json(
-        { message: 'Provided data was not an image' }
+        { message: 'Provided data was not an image' },
+        { status: 400 }
       )
     }
+
+    if (!['png', 'jpeg', 'jpg'].includes(contentType))
+      return NextResponse.json(
+        { message: `Image must be one of png, jpeg, or jpg` },
+        { status: 400 }
+      )
 
     // Convert the image data back to a Buffer
     const imageBuffer = Buffer.from(data.image.data, `base64`);
