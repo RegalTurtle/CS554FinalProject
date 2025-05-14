@@ -4,7 +4,7 @@ To set up, follow these instructions:
 1. Have Node and npm installed
 2. Run `npm i` to install dependancies
 3. Check you have a correctly formatted `.env` file. It should have:
-    1. `MONGO_URI`: an optional URI for the Mongo database. If ommitted, uses locally hosted
+    1. `MONGO_URI`: an optional URI for the Mongo database. If ommitted, uses locally hosted. Remove this if you want to use a local database
     2. `USE_IM`: Set to `true` or `false` depending on whether you want to load ImageMagick
         1. If you set `USE_IM=false`, the site will default to using Sharp, and you can skip step 4
     3. `SESSION_SECRET`: Used for tracking the session
