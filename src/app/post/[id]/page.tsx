@@ -16,19 +16,36 @@ interface Post {
   comments: any[];
 }
 
+interface Session {
+  userId: string;
+  // add more fields if needed
+}
+
 export default function SingularPostPage() {
   const { id } = useParams();
   const [post, setPost] = useState<Post | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`/api/post/${id}`);
-        if (!response.ok) throw new Error('Failed to fetch post');
-        const data = await response.json();
-        setPost(data.post.post);
+        const [postRes, sessionRes] = await Promise.all([
+          fetch(`/api/post/${id}`),
+          fetch(`/api/session`),
+        ]);
+
+        if (!postRes.ok) throw new Error('Failed to fetch post');
+        const postData = await postRes.json();
+        setPost(postData.post.post);
+
+        const sessionData = await sessionRes.json();
+        if (sessionData.session?.userId) {
+          setSession(sessionData.session);
+        } else {
+          setSession(null);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -36,7 +53,7 @@ export default function SingularPostPage() {
       }
     };
 
-    fetchPost();
+    fetchData();
   }, [id]);
 
   if (loading)
@@ -48,10 +65,8 @@ export default function SingularPostPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
-      {/* Title */}
       <h1 className="text-3xl font-extrabold text-gray-900">{post.title}</h1>
 
-      {/* Image */}
       <div className="relative w-full aspect-[4/3] rounded-md overflow-hidden shadow-md">
         <Image
           src={`data:image/jpeg;base64,${post.image}`}
@@ -63,7 +78,6 @@ export default function SingularPostPage() {
         />
       </div>
 
-      {/* Caption */}
       <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-1">Caption:</h2>
         <p className="text-gray-700 whitespace-pre-line leading-relaxed">
@@ -71,7 +85,6 @@ export default function SingularPostPage() {
         </p>
       </div>
 
-      {/* Likes */}
       <div>
         <h3 className="text-lg font-semibold text-gray-800 mb-2">Liked by:</h3>
         {post.likedUsers?.length > 0 ? (
@@ -87,14 +100,14 @@ export default function SingularPostPage() {
         )}
       </div>
 
-      {/* Comments */}
       <div>
         <h3 className="text-lg font-semibold text-gray-800 mb-2">Comments:</h3>
         {post.comments?.length > 0 ? (
           <ul className="pl-5 list-disc space-y-1 text-gray-700">
             {post.comments.map((comment, i) => (
               <li key={i}>
-                <strong>{comment.user.name || 'Anonymous'}:</strong> {comment.text}
+                <strong>{comment.user.name || 'Anonymous'}:</strong>{' '}
+                {comment.text}
               </li>
             ))}
           </ul>
@@ -103,10 +116,13 @@ export default function SingularPostPage() {
         )}
       </div>
 
-      <div>
-        <LikeButton postId={post._id} setPost={setPost} />
-        <CommentButton postId={post._id} setPost={setPost} />
-      </div>
+      {/* Like and Comment buttons only if user is logged in */}
+      {session && (
+        <div>
+          <LikeButton postId={post._id} setPost={setPost} />
+          <CommentButton postId={post._id} setPost={setPost} />
+        </div>
+      )}
     </div>
   );
 }
