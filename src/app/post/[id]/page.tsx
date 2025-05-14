@@ -104,7 +104,7 @@ export default function SingularPostPage() {
       </div>
 
       <div>
-        <LikeButton postId={post._id} />
+        <LikeButton postId={post._id} setPost={setPost} />
         <CommentButton postId={post._id} />
       </div>
     </div>

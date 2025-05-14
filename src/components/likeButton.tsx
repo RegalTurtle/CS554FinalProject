@@ -1,9 +1,20 @@
 "use client";
 
-import {useState} from "react";
+import {Dispatch, SetStateAction, useState} from "react";
+
+interface Post {
+  _id: string;
+  userId: string;
+  title: string;
+  image: string;
+  caption: string;
+  likedUsers: any[];
+  comments: any[];
+}
 
 interface Props {
 	postId: string
+  setPost: Dispatch<SetStateAction<Post | null>>
 }
 
 export default function LikeButton(props: Props) {
@@ -27,6 +38,7 @@ export default function LikeButton(props: Props) {
 				throw errorData.message;
 			}
 
+      props.setPost((await response.json()).post);
 		} catch (e) {
 			console.error("Error (un)liking post: ", e);
 			setError(e instanceof Error ? e.message : "An unknown error occurred");
