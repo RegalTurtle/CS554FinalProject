@@ -6,13 +6,13 @@ import fs from 'fs/promises';
 // Redis stuff
 import * as redis from 'redis';
 // const client = redis.createClient({ url: `redis://173.3.80.96:6379` });
-const client = redis.createClient();
-await client.connect();
+//const client = redis.createClient();
+//await client.connect();
 
 export const seed = async (): Promise<void> => {
   const db = await dbConnection();
   await db.dropDatabase();
-  await client.flushAll();
+  //await client.flushAll();
   console.log('Database dropped');
 
   await registerUser("Thys", "Vanderschoot", "thysvanderschoot@gmail.com", "GoodPass123!");
