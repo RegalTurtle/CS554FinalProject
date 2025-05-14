@@ -80,7 +80,7 @@ export default function NewPostPage() {
         throw new Error('Please select an image');
       }
 
-      if (!['png', 'jpg', 'jpeg'].includes(formData.image.type))
+      if (!['image/png', 'image/jpg', 'image/jpeg'].includes(formData.image.type))
         throw new Error('Images must be png, jpg, or jpeg');
 
       // Convert image to base64
@@ -138,7 +138,7 @@ export default function NewPostPage() {
         throw new Error('Please select an image');
       }
 
-      if (!['png', 'jpg', 'jpeg'].includes(formData.image.type))
+      if (!['image/png', 'image/jpg', 'image/jpeg'].includes(formData.image.type))
         throw new Error('Images must be png, jpg, or jpeg');
 
       // Convert image to base64
