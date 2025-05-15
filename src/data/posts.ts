@@ -8,7 +8,7 @@ import { User, getUser } from './users';
 const client = redis.createClient();
 await client.connect();
 
-type PublicUser = Omit<User, "password">;
+type PublicUser = Omit<User, 'password'>;
 
 export interface Post {
   _id: ObjectId | string;
@@ -91,11 +91,6 @@ export const createPost = async (
   }
 };
 
-async function clearRedis() {
-  await client.flushAll();
-  console.log('Redis Cleared');
-}
-
 export const getPostById = async (
   id: ObjectId | string
 ): Promise<{ postFound: boolean; post?: Post }> => {
@@ -103,7 +98,7 @@ export const getPostById = async (
     if (typeof id === 'string') id = id.trim();
 
     // Check if it is in Cache
-    await clearRedis();
+
     const cache = await client.get(`post${id}`);
     if (cache) {
       console.log('getPostById: Post is Cached.');
@@ -270,7 +265,6 @@ export const getAllPostsByUser = async (
   try {
     if (typeof userId === 'string') userId = userId.trim();
     // Check if it is in Cache
-    await clearRedis();
     const cache = await client.get(`allPosts-${userId.toString()}`);
     if (cache) {
       console.log('getAllPosts: All Posts is Cached');
@@ -310,22 +304,27 @@ export const likePost = async (
 
     const postObj = await getPostById(postId);
     const post: Post | undefined = postObj.post;
-    if (post === undefined)
-      throw `no post with ID ${postId}`;
+    if (post === undefined) throw `no post with ID ${postId}`;
 
     const user: PublicUser | undefined = await getUser(userId.toString());
-    if (!user)
-      throw `no user with ID ${userId}`;
+    if (!user) throw `no user with ID ${userId}`;
     let newLikedUsers: PublicUser[] = post.likedUsers;
 
-    if (newLikedUsers.find((elem) => elem !== null && elem._id.toString() === user._id.toString()) !== undefined) {
-      newLikedUsers = newLikedUsers.filter((elem) => elem === null || elem._id.toString() !== user._id.toString());
+    if (
+      newLikedUsers.find(
+        (elem) => elem !== null && elem._id.toString() === user._id.toString()
+      ) !== undefined
+    ) {
+      newLikedUsers = newLikedUsers.filter(
+        (elem) => elem === null || elem._id.toString() !== user._id.toString()
+      );
     } else {
       newLikedUsers.push(user);
     }
 
     const postCollection = await posts();
-    const updatedPost: Post | undefined = await postCollection.findOneAndUpdate( // findOneAndUpdate here so that we actually get the object back -Thys
+    const updatedPost: Post | undefined = await postCollection.findOneAndUpdate(
+      // findOneAndUpdate here so that we actually get the object back -Thys
       {
         _id: new ObjectId(postId),
       },
@@ -374,22 +373,21 @@ export const createComment = async (
 
     const postObj = await getPostById(postId);
     const post: Post | undefined = postObj.post;
-    if (!post)
-      throw `no post with ID ${postId}`;
+    if (!post) throw `no post with ID ${postId}`;
 
     const user: PublicUser | undefined = await getUser(userId.toString());
-    if (!user)
-      throw `no user with ID ${userId}`;
+    if (!user) throw `no user with ID ${userId}`;
 
     const comment: Comment = {
       user: user,
-      text: text
+      text: text,
     };
     let newComments = post.comments;
     newComments.push(comment);
 
     const postCollection = await posts();
-    const updatedPost: Post | undefined = await postCollection.findOneAndUpdate( // findOneAndUpdate here so that we actually get the object back -Thys
+    const updatedPost: Post | undefined = await postCollection.findOneAndUpdate(
+      // findOneAndUpdate here so that we actually get the object back -Thys
       {
         _id: new ObjectId(postId),
       },
